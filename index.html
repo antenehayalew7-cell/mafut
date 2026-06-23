@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="theme-color" content="#0f0700"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <title>Mafut Nation</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0a0c;--surface:#15151a;--card:#1c1c22;--border:#2a2a32;
+      --gold:#f5b840;--gold2:#a67419;--text:#f5f5f7;--dim:#7a7a86;
+      --green:#34c759;--yellow:#ffb020;--red:#ff453a;--blue:#0a84ff;--purple:#bf5af2;--r:14px;
+    }
+    body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:440px;margin:0 auto;padding-bottom:32px;-webkit-font-smoothing:antialiased;transition:background 0.3s ease;}
+    * {transition:border-color 0.2s ease,background-color 0.2s ease,color 0.2s ease;}
+
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px 12px;position:sticky;top:0;z-index:100;}
+    header h1{font-size:19px;font-weight:700;letter-spacing:-0.3px;color:var(--text);}
+    header h1 span{color:var(--gold);}
+    header p{font-size:11px;color:var(--dim);margin-top:1px;font-weight:500;}
+
+    nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:55px;z-index:99;overflow-x:auto;scrollbar-width:none;padding:0 4px;}
+    nav::-webkit-scrollbar{display:none;}
+    nav button{flex-shrink:0;flex:1;padding:11px 6px;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);font-size:12px;font-weight:600;letter-spacing:-0.1px;cursor:pointer;white-space:nowrap;}
+    nav button.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+    .view{display:none;padding:14px;opacity:0;animation:fadeIn 0.3s ease forwards;}
+    .view.active{display:block;opacity:1;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+    .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden;}
+    .stat::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,transparent,rgba(245,184,64,.05));opacity:0;transition:opacity 0.3s ease;}
+    .stat:hover::before{opacity:1;}
+    .stat .n{font-size:24px;font-weight:700;color:var(--text);line-height:1.1;letter-spacing:-0.5px;position:relative;z-index:1;}
+    .stat .l{font-size:11px;color:var(--dim);margin-top:6px;font-weight:500;position:relative;z-index:1;}
+
+    .sec{font-size:12px;font-weight:600;letter-spacing:-0.1px;color:var(--dim);margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+    .sec:first-child{margin-top:0;}
+    .alert-box{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:var(--r);padding:11px 14px;margin-bottom:14px;font-size:12px;color:#e74c3c;font-weight:600;}
+
+    /* WEEK BANNER */
+    .week-banner{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;}
+    .week-banner .wb-label{font-size:11px;color:var(--gold);font-weight:600;}
+    .week-banner .wb-since{font-size:13px;color:var(--dim);margin-top:1px;font-weight:500;}
+    .week-banner .wb-stats{display:flex;gap:18px;margin-top:14px;}
+    .week-banner .wb-stat .v{font-size:22px;font-weight:700;line-height:1;letter-spacing:-0.5px;}
+    .week-banner .wb-stat .k{font-size:11px;color:var(--dim);margin-top:4px;font-weight:500;}
+
+    /* STOCK CARD */
+    .scard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:9px;cursor:pointer;}
+    .scard:hover{border-color:var(--gold2);background:rgba(245,184,64,.03);}
+    .scard.low{border-left:3px solid var(--red);}
+    .scard.warn{border-left:3px solid var(--yellow);}
+    .scard.ok{border-left:3px solid var(--green);}
+    .scard-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+    .scard-name{font-size:15px;font-weight:700;}
+    .scard-del{background:none;border:none;color:var(--dim);font-size:19px;cursor:pointer;line-height:1;padding:0 2px;}
+    .scard-del:active{color:var(--red);}
+    .tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 9px;border-radius:10px;margin-top:3px;}
+    .t-beer{background:rgba(232,160,32,.12);color:var(--gold);}
+    .t-dampy{background:rgba(39,174,96,.12);color:var(--green);}
+    .t-cans{background:rgba(58,143,208,.16);color:#60a5fa;}
+    .t-cider{background:rgba(52,152,219,.12);color:#3498db;}
+    .t-spirit{background:rgba(168,85,247,.16);color:#c084fc;}
+    .t-other{background:rgba(127,140,141,.12);color:#95a5a6;}
+
+    .urow{display:flex;align-items:center;gap:8px;padding:5px 0;}
+    .urow + .urow{border-top:1px solid var(--border);}
+    .ulabel{font-size:12px;color:var(--dim);flex:1;}
+    .ulabel strong{color:var(--text);}
+    .qc{display:flex;align-items:center;gap:7px;}
+    .qb{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .qb:hover{background:var(--card);border-color:var(--gold2);}
+    .qb:active{background:var(--gold);color:#000;transform:scale(0.95);}
+    .qn{font-size:18px;font-weight:700;min-width:32px;text-align:center;}
+    .qn.z{color:var(--red);}.qn.w{color:var(--yellow);}.qn.g{color:var(--text);}
+    .qn-input{font-size:18px;font-weight:700;width:54px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:4px 2px;outline:none;-moz-appearance:textfield;}
+    .qn-input::-webkit-outer-spin-button,.qn-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+    .qn-input:focus{border-color:var(--gold);background:#000;}
+    .qn-input.z{color:var(--red);}.qn-input.w{color:var(--yellow);}.qn-input.g{color:var(--text);}
+    .card-footer{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--dim);}
+    .card-footer .total{font-size:14px;font-weight:700;color:var(--text);}
+
+    .search{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:14px;width:100%;margin-bottom:12px;outline:none;}
+    .search::placeholder{color:var(--dim);}
+    .search:focus{border-color:var(--gold2);}
+    .filters{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .filters::-webkit-scrollbar{display:none;}
+    .fbtn{white-space:nowrap;padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;}
+    .fbtn.active{background:var(--gold);color:#000;border-color:var(--gold);}
+
+    .form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:14px;}
+    .form-card h3{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;letter-spacing:-0.2px;}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .frow.full{grid-template-columns:1fr;}
+    label{font-size:11px;color:var(--dim);font-weight:500;display:block;margin-bottom:5px;}
+    input,select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;width:100%;outline:none;}
+    input:hover,select:hover{border-color:var(--dim);}
+    input:focus,select:focus{border-color:var(--gold);background:var(--card);box-shadow:0 0 0 3px rgba(245,184,64,.1);}
+    select option{background:var(--surface);}
+    .hint{font-size:10px;color:var(--dim);margin-top:4px;}
+    .hint.gold{color:var(--gold2);}
+    .btnp{background:var(--gold);color:#15151a;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;width:100%;cursor:pointer;letter-spacing:-0.1px;box-shadow:0 2px 8px rgba(245,184,64,.15);}
+    .btnp:hover{background:#f5c555;box-shadow:0 4px 12px rgba(245,184,64,.25);}
+    .btnp:active{opacity:.9;transform:scale(0.98);}
+    .btns{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;font-weight:600;width:100%;cursor:pointer;}
+    .btns:hover{background:var(--card);border-color:var(--gold2);}
+    .btns:active{transform:scale(0.98);}
+
+    .buy-preview{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:12px;color:var(--dim);}
+    .buy-preview strong{color:var(--gold);font-size:14px;}
+
+    .picker-wrap{position:relative;margin-bottom:10px;}
+    .picker-search{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:11px 14px;color:var(--text);font-size:15px;width:100%;outline:none;}
+    .picker-search:focus{border-color:var(--gold);}
+    .picker-search::placeholder{color:var(--dim);}
+    .picker-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);z-index:200;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none;}
+    .picker-dropdown.open{display:block;}
+    .picker-section-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 14px 4px;border-bottom:1px solid var(--border);}
+    .picker-option{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;border-bottom:1px solid rgba(58,32,0,.5);}
+    .picker-option:last-child{border-bottom:none;}
+    .picker-option:active{background:rgba(232,160,32,.1);}
+    .picker-option .po-name{font-size:14px;font-weight:600;color:var(--text);}
+    .picker-option .po-stock{font-size:11px;color:var(--dim);margin-top:2px;}
+    .picker-option .po-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+    .selected-item-card{background:rgba(232,160,32,.08);border:1px solid var(--gold2);border-radius:var(--r);padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+    .selected-item-card .si-name{font-size:15px;font-weight:700;color:var(--gold);}
+    .selected-item-card .si-info{font-size:11px;color:var(--dim);margin-top:2px;}
+    .selected-item-card .si-clear{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;}
+
+    .info-box{background:rgba(58,143,208,.1);border:1px solid rgba(58,143,208,.25);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:12px;color:#60a5fa;}
+    .info-box strong{display:block;font-size:13px;margin-bottom:3px;}
+
+    .ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:9px;}
+    .ccard-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+    .ccard-name{font-size:14px;font-weight:700;}
+    .sys-line{font-size:11px;color:var(--dim);margin-bottom:10px;}
+    .sys-line span{color:var(--text);font-weight:600;}
+    .count-fields{display:flex;flex-direction:column;gap:8px;}
+    .count-field-row{display:flex;align-items:center;gap:10px;}
+    .count-field-row label{flex:1;font-size:12px;color:var(--dim);text-transform:none;letter-spacing:0;margin:0;}
+    .cfield{background:var(--surface);border:2px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-size:20px;font-weight:700;width:80px;outline:none;text-align:center;}
+    .cfield:focus{border-color:var(--gold);}
+    .cfield.changed{border-color:var(--gold2);}
+    .variance-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;}
+    .vbadge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;}
+    .vg{background:rgba(39,174,96,.15);color:var(--green);}
+    .vy{background:rgba(232,160,32,.12);color:var(--gold);}
+    .vr{background:rgba(231,76,60,.15);color:var(--red);}
+    .vn{background:rgba(127,140,141,.1);color:var(--dim);}
+    .count-actions{display:flex;gap:10px;margin-top:16px;}
+    .count-actions .btnp,.count-actions .btns{margin:0;}
+
+    /* REPORT */
+    .rcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+    .rcard-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .rcard-name{font-size:15px;font-weight:700;}
+    .rline{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);}
+    .rline:last-of-type{border-bottom:none;}
+    .rline .rk{color:var(--dim);}
+    .rline .rv{font-weight:600;}
+    .rprofit{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:2px solid var(--gold2);font-size:15px;font-weight:800;}
+    .rprofit .rv{color:var(--green);}
+    .big-money{background:linear-gradient(135deg,rgba(39,174,96,.16),rgba(39,174,96,.04));border:1px solid rgba(39,174,96,.35);border-radius:var(--r);padding:18px;margin-bottom:16px;text-align:center;}
+    .big-money .bm-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--green);font-weight:700;}
+    .big-money .bm-value{font-size:38px;font-weight:800;color:var(--green);line-height:1;margin-top:6px;}
+    .big-money .bm-sub{font-size:12px;color:var(--dim);margin-top:8px;}
+
+    .reorder-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+    .reorder-card .ro-name{font-size:14px;font-weight:700;}
+    .reorder-card .ro-sub{font-size:11px;color:var(--dim);margin-top:2px;}
+    .reorder-card .ro-qty{font-size:13px;font-weight:700;color:var(--gold);text-align:right;}
+
+    .hcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:9px;}
+    .hcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .hdate{font-size:13px;font-weight:700;}
+    .hbadge{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;}
+    .hb-ok{background:rgba(39,174,96,.15);color:var(--green);}
+    .hb-warn{background:rgba(231,76,60,.15);color:var(--red);}
+    .hrow{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);}
+    .hrow:last-child{border:none;}
+
+    .ucard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:8px;}
+    .uname{font-size:14px;font-weight:600;}
+    .upack{font-size:11px;color:var(--dim);margin-top:2px;}
+    .ubot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+    .uprice{font-size:16px;font-weight:700;color:var(--gold);}
+    .ubadge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+    .ubadge.y{background:rgba(39,174,96,.15);color:var(--green);}
+    .ubadge.n{background:rgba(231,76,60,.15);color:var(--red);}
+
+    .litem{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    .lname{font-size:13px;font-weight:600;}
+    .ltime{font-size:10px;color:var(--dim);margin-top:2px;}
+    .ldesc{font-size:12px;font-weight:600;text-align:right;flex-shrink:0;}
+
+    .spirit-lvl{display:flex;gap:6px;margin-top:6px;}
+    .slvl{flex:1;padding:7px 2px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--dim);font-size:11px;font-weight:700;text-align:center;cursor:pointer;}
+    .slvl.active{background:rgba(232,160,32,.18);border-color:var(--gold2);color:var(--gold);}
+
+    .empty{text-align:center;padding:32px 20px;color:var(--dim);font-size:13px;}
+    .empty .ico{font-size:38px;margin-bottom:10px;}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mafut <span>Nation</span></h1>
+  <p>Bar Stock & Sales · Germiston</p>
+</header>
+
+<nav>
+  <button class="active" onclick="tab('dash')">Home</button>
+  <button onclick="tab('stock')">Stock</button>
+  <button onclick="tab('buy')">Buy</button>
+  <button onclick="tab('count')">Count</button>
+  <button onclick="tab('free')">Comps</button>
+  <button onclick="tab('credit')">Credit</button>
+  <button onclick="tab('expenses')">Expenses</button>
+  <button onclick="tab('report')">Report</button>
+  <button onclick="tab('data')">Data</button>
+</nav>
+
+<!-- HOME -->
+<div id="v-dash" class="view active">
+  <div class="week-banner">
+    <div class="wb-label">This week</div>
+    <div class="wb-since" id="wb-since">—</div>
+    <div class="wb-stats">
+      <div class="wb-stat"><div class="v" id="wb-rev" style="color:var(--green)">R0</div><div class="k">Sales</div></div>
+      <div class="wb-stat"><div class="v" id="wb-profit" style="color:var(--gold)">R0</div><div class="k">Profit</div></div>
+      <div class="wb-stat"><div class="v" id="wb-sold">0</div><div class="k">Sold</div></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="stat"><div class="n" id="s-total">0</div><div class="l">Products</div></div>
+    <div class="stat"><div class="n" id="s-low" style="color:var(--red)">0</div><div class="l">Low stock</div></div>
+    <div class="stat"><div class="n" id="s-credit" style="color:var(--gold)">R0</div><div class="l">Money owed</div></div>
+    <div class="stat"><div class="n" id="s-bulk">0</div><div class="l">Crates / cases</div></div>
+  </div>
+
+  <div id="d-alert"></div>
+  <div class="sec">Needs refilling</div>
+  <div id="d-low"></div>
+</div>
+
+<!-- STOCK -->
+<div id="v-stock" class="view">
+  <input class="search" id="srch" type="search" placeholder="Search stock…" oninput="renderStock()"/>
+  <div class="filters" id="filts"></div>
+  <div id="stock-list"></div>
+  <button class="btns" style="margin-top:24px;font-size:11px;color:var(--dim);border-color:var(--border);" onclick="startFresh()">Clear all & start fresh</button>
+</div>
+
+<!-- BUY -->
+<div id="v-buy" class="view">
+  <div class="form-card">
+    <h3>Record a purchase</h3>
+    <label>Search & Select Item</label>
+    <div class="picker-wrap" id="picker-wrap">
+      <input class="picker-search" id="picker-search" type="text" placeholder="Type to search…" autocomplete="off"
+        oninput="pickerSearch()" onfocus="pickerOpen()" onblur="pickerBlur()"/>
+      <div class="picker-dropdown" id="picker-dropdown"></div>
+    </div>
+    <div id="selected-item-display" style="display:none;"></div>
+
+    <div id="buy-bulk-section" style="display:none;">
+      <div class="frow">
+        <div>
+          <label id="buy-bulk-lbl">Crates</label>
+          <input id="buy-bulk" type="number" placeholder="0" min="0" oninput="updateBuyPreview()"/>
+        </div>
+        <div>
+          <label>Extra loose</label>
+          <input id="buy-loose" type="number" placeholder="0" min="0" oninput="updateBuyPreview()"/>
+        </div>
+      </div>
+      <div class="frow full">
+        <div>
+          <label>Total paid (R)</label>
+          <input id="buy-cost" type="number" placeholder="0.00" step="0.01" min="0"/>
+        </div>
+      </div>
+      <div class="buy-preview" id="buy-preview">Select an item and enter quantity</div>
+    </div>
+
+    <div id="buy-spirit-section" style="display:none;">
+      <div class="frow">
+        <div>
+          <label>Bottles bought</label>
+          <input id="buy-spirit-qty" type="number" placeholder="0" min="0" oninput="updateBuyPreview()"/>
+          <div class="hint gold">Spirits bought per bottle</div>
+        </div>
+        <div>
+          <label>Total paid (R) — optional</label>
+          <input id="buy-spirit-cost" type="number" placeholder="0.00" step="0.01" min="0"/>
+        </div>
+      </div>
+      <div class="buy-preview" id="buy-spirit-preview">Select an item and enter quantity</div>
+    </div>
+
+    <button class="btnp" onclick="recordBuy()" style="margin-top:4px;">Add to Stock</button>
+  </div>
+
+  <div class="form-card">
+    <h3>Add new product</h3>
+    <div class="frow full">
+      <div>
+        <label>Product name</label>
+        <input id="a-name" type="text" list="catalog-names" placeholder="Black Label, Heineken…" oninput="catalogAutofill()" autocomplete="off"/>
+        <datalist id="catalog-names"></datalist>
+          </div>
+    </div>
+    <div class="frow">
+      <div style="display:none;"><input id="a-bulkname" type="text"/></div>
+      <div style="display:none;"><input id="a-pk" type="number"/></div>
+      <div>
+        <label>Type</label>
+        <select id="a-type" onchange="typeChanged()">
+          <option value="beer">Beer (Bottles)</option>
+          <option value="dampy">Dampies</option>
+          <option value="cans">Cans</option>
+          <option value="cider">Cider</option>
+          <option value="spirit">Spirits</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div></div>
+    </div>
+    <div id="a-bulk-fields">
+      <div class="frow">
+        <div><label id="a-bulk-lbl">Starting crates</label><input id="a-bulk" type="number" placeholder="0" min="0"/>
+          <div class="hint" id="a-bulk-hint">1 crate = 12 bottles</div></div>
+        <div><label>Loose units</label><input id="a-loose" type="number" placeholder="0" min="0"/></div>
+      </div>
+    </div>
+    <div id="a-spirit-fields" style="display:none;">
+      <div class="frow">
+        <div><label>Starting bottles</label><input id="a-sbottles" type="number" placeholder="0" min="0"/></div>
+        <div>
+          <label>Open bottle</label>
+          <div class="spirit-lvl" id="a-lvl">
+            <div class="slvl active" data-v="full" onclick="selLvl(this,'a-lvl')">Full</div>
+            <div class="slvl" data-v="half" onclick="selLvl(this,'a-lvl')">Half</div>
+            <div class="slvl" data-v="quarter" onclick="selLvl(this,'a-lvl')">¼</div>
+            <div class="slvl" data-v="none" onclick="selLvl(this,'a-lvl')">None</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="frow">
+      <div><label>Cost price / unit (R)</label><input id="a-cost" type="number" placeholder="0.00" step="0.01"/>
+        <div class="hint">what you pay</div></div>
+      <div><label>Sell price / unit (R)</label><input id="a-sell" type="number" placeholder="0.00" step="0.01"/>
+        <div class="hint">what customers pay</div></div>
+    </div>
+    <div class="frow full">
+      <div><label>Refill alert at (loose units)</label><input id="a-min" type="number" placeholder="6" min="0"/></div>
+    </div>
+    <button class="btnp" onclick="addProduct()">Create Product</button>
+  </div>
+</div>
+
+<!-- COUNT -->
+<div id="v-count" class="view">
+  <div class="info-box">
+    <strong>📋 End-of-Week Stock Count</strong>
+    Count what's physically left. Enter full crates/cases PLUS loose units. The app works out what you sold, then you can close the week in the Report tab.
+  </div>
+  <div class="filters" id="c-filts"></div>
+  <div id="count-list"></div>
+  <div class="count-actions" id="count-actions" style="display:none;">
+    <button class="btns" onclick="clearCount()">Clear</button>
+    <button class="btnp" onclick="saveCount()">Save Count</button>
+  </div>
+  <div class="sec">Count History</div>
+  <div id="count-hist"></div>
+</div>
+
+<!-- FREE DRINKS -->
+<div id="v-free" class="view">
+  <div class="big-money" style="background:linear-gradient(135deg,rgba(168,85,247,.14),rgba(168,85,247,.04));border-color:rgba(168,85,247,.35);">
+    <div class="bm-label" style="color:var(--purple);">🍸 Free Beers This Week</div>
+    <div class="bm-value" id="free-count" style="color:var(--purple);">0</div>
+    <div class="bm-sub" id="free-sub">limit not set</div>
+  </div>
+  <div id="free-progress-wrap" style="margin-bottom:16px;">
+    <div style="height:10px;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+      <div id="free-bar" style="height:100%;width:0%;background:var(--purple);transition:width .3s;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--dim);">
+      <span id="free-bar-lbl">0 given</span>
+      <button class="scard-del" style="font-size:12px;color:var(--gold);" onclick="setFreeLimit()">Set limit ✏️</button>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>🍻 Give a Free Drink</h3>
+    <div class="frow">
+      <div><label>Which beer</label><select id="free-item"></select></div>
+      <div><label>How many</label><input id="free-qty" type="number" placeholder="1" min="1" value="1"/></div>
+    </div>
+    <div class="frow full">
+      <div>
+        <label>For who</label>
+        <select id="free-reason">
+          <option value="girls">💃 Girls / Vibe</option>
+          <option value="dj">🎧 DJ</option>
+          <option value="staff">👷 Staff</option>
+          <option value="other">📌 Other</option>
+        </select>
+      </div>
+    </div>
+    <button class="btnp" onclick="giveFree()">Give & Deduct from Stock</button>
+  </div>
+
+  <div class="sec">Free Drinks This Week</div>
+  <div id="free-list"></div>
+</div>
+
+<!-- CREDIT BOOK -->
+<div id="v-credit" class="view">
+  <div class="big-money" style="background:linear-gradient(135deg,rgba(232,160,32,.16),rgba(232,160,32,.04));border-color:var(--gold2);">
+    <div class="bm-label" style="color:var(--gold);">📒 Money Out on Credit</div>
+    <div class="bm-value" id="credit-total" style="color:var(--gold);">R0</div>
+    <div class="bm-sub" id="credit-sub">0 people owe you</div>
+  </div>
+
+  <div class="form-card" style="border-color:var(--gold2);">
+    <h3>Bar contact number</h3>
+    <div class="frow full"><div>
+      <label>Your phone number</label>
+      <input id="bar-phone" type="tel" placeholder="082 555 1234" onchange="saveBarPhone()"/>
+      <div class="hint" id="bar-phone-status"></div>
+    </div></div>
+  </div>
+
+  <div class="form-card">
+    <h3>Give credit (tab)</h3>
+    <div class="frow">
+      <div><label>Customer name</label><input id="cr-name" type="text" placeholder="e.g. Sipho" oninput="suggestCustomer()"/></div>
+      <div><label>Phone (for WhatsApp)</label><input id="cr-phone" type="tel" placeholder="e.g. 082 555 1234"/></div>
+    </div>
+    <div id="cr-suggest" style="display:none;font-size:11px;color:var(--gold);margin:-6px 0 8px;"></div>
+    <div class="frow">
+      <div><label>Amount (R)</label><input id="cr-amount" type="number" placeholder="0.00" step="0.01" min="0"/></div>
+      <div><label>What they took</label><input id="cr-note" type="text" placeholder="e.g. 6 Castle + 2 Heineken"/></div>
+    </div>
+    <button class="btnp" onclick="addCredit()">Add to Credit Book</button>
+  </div>
+
+  <div class="sec">People who owe you</div>
+  <div id="credit-owing"></div>
+  <div class="sec">Settled</div>
+  <div id="credit-paid"></div>
+</div>
+
+<!-- EXPENSES -->
+<div id="v-expenses" class="view">
+  <div class="big-money" style="background:linear-gradient(135deg,rgba(231,76,60,.14),rgba(231,76,60,.04));border-color:rgba(231,76,60,.35);">
+    <div class="bm-label" style="color:var(--red);">💸 Total Weekly Expenses</div>
+    <div class="bm-value" id="exp-total" style="color:var(--red);">R0</div>
+    <div class="bm-sub" id="exp-sub">Salaries, rent, vibe & more</div>
+  </div>
+
+  <div class="form-card">
+    <h3>Add expense</h3>
+    <div class="frow">
+      <div><label>What for</label><input id="exp-name" type="text" placeholder="e.g. DJ Saturday"/></div>
+      <div>
+        <label>Category</label>
+        <select id="exp-cat">
+          <option value="salary">Staff Salary</option>
+          <option value="dj">DJ / Entertainment</option>
+          <option value="security">Security</option>
+          <option value="manager">Manager</option>
+          <option value="comps">Free Drinks (Vibe)</option>
+          <option value="rent">Rent</option>
+          <option value="utilities">Electricity / Water</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div><label>Amount (R)</label><input id="exp-amount" type="number" placeholder="0.00" step="0.01" min="0"/></div>
+      <div>
+        <label>How often</label>
+        <select id="exp-freq">
+          <option value="weekly">Every week</option>
+          <option value="once">One-off (this week)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btnp" onclick="addExpense()">Add Expense</button>
+  </div>
+
+  <div class="sec">Recurring (Every Week)</div>
+  <div id="exp-recurring"></div>
+  <div class="sec">One-Off (This Week)</div>
+  <div id="exp-oneoff"></div>
+</div>
+
+<!-- REPORT -->
+<div id="v-report" class="view">
+  <div class="big-money">
+    <div class="bm-label">💰 This Week's NET Profit</div>
+    <div class="bm-value" id="rep-net">R0</div>
+    <div class="bm-sub" id="rep-sub">after beer cost & all expenses</div>
+  </div>
+
+  <div class="form-card" style="padding:14px;">
+    <div class="rline"><span class="rk">Beer / drink sales</span><span class="rv" id="rep-sales" style="color:var(--green)">R0</span></div>
+    <div class="rline"><span class="rk">− Cost of beer sold</span><span class="rv" id="rep-cogs" style="color:var(--red)">R0</span></div>
+    <div class="rline"><span class="rk">= Gross profit</span><span class="rv" id="rep-gross" style="color:var(--gold)">R0</span></div>
+    <div class="rline"><span class="rk">− Free drinks given (cost)</span><span class="rv" id="rep-comp" style="color:var(--red)">R0</span></div>
+    <div class="rline"><span class="rk">− Expenses (salaries, rent…)</span><span class="rv" id="rep-exp" style="color:var(--red)">R0</span></div>
+    <div class="rprofit"><span>= NET PROFIT</span><span class="rv" id="rep-netline">R0</span></div>
+  </div>
+  <div class="info-box" id="rep-credit-note" style="margin-bottom:16px;"></div>
+
+  <button class="btnp" onclick="closeWeek()" style="margin-bottom:8px;">📦 Close Week & Start Fresh</button>
+  <button class="btns" onclick="tab('count')" style="margin-bottom:16px;">Go to Stock Count</button>
+
+  <div class="sec">Refill shopping list</div>
+  <div id="rep-reorder"></div>
+
+  <div class="sec">Per-Product Breakdown (this week)</div>
+  <div id="rep-breakdown"></div>
+
+  <div class="sec">Past Weeks</div>
+  <div id="rep-weeks"></div>
+</div>
+
+<!-- ULTRA -->
+<div id="v-ultra" class="view">
+  <div class="sec">Ultra Liquors SA — Reference Prices</div>
+  <p style="font-size:11px;color:var(--dim);margin-bottom:14px;">Typical Ultra Liquors SA prices — verify in store.</p>
+  <div class="filters" id="u-filts"></div>
+  <div id="u-list"></div>
+</div>
+
+<!-- DATA / EXPORT -->
+<div id="v-data" class="view">
+  <div class="form-card">
+    <h3>Export data</h3>
+    <div class="frow full">
+      <div>
+        <button class="btnp" onclick="exportJSON()" style="background:var(--blue);">Download JSON backup</button>
+        <div class="hint" style="margin-top:8px;">Complete backup of all data (stock, credit, expenses, history)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>Import data</h3>
+    <div class="frow full">
+      <div>
+        <label>Restore from backup</label>
+        <input type="file" id="import-file" accept=".json" style="padding:8px;"/>
+        <button class="btns" onclick="importJSON()" style="margin-top:8px;">Import backup</button>
+        <div class="hint" style="margin-top:8px;">Replaces current data — backup first!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>Reports</h3>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btns" onclick="exportCSVStock()">Stock list (CSV)</button>
+      <button class="btns" onclick="exportCSVCredit()">Credit book (CSV)</button>
+      <button class="btns" onclick="exportCSVExpenses()">Expenses (CSV)</button>
+      <button class="btns" onclick="exportCSVHistory()">Weekly history (CSV)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const CFG = {
+  beer:   {bulk:12, bulkName:'Crate',  unit:'bottles', tag:'t-beer',  label:'Beer'},
+  dampy:  {bulk:24, bulkName:'Crate',  unit:'dampies', tag:'t-dampy', label:'Dampy'},
+  cans:   {bulk:24, bulkName:'Case',   unit:'cans',    tag:'t-cans',  label:'Cans'},
+  cider:  {bulk:6,  bulkName:'6-pack', unit:'bottles', tag:'t-cider', label:'Cider'},
+  spirit: {bulk:1,  bulkName:'Bottle', unit:'bottles', tag:'t-spirit',label:'Spirit'},
+  other:  {bulk:6,  bulkName:'Pack',   unit:'units',   tag:'t-other', label:'Other'},
+};
+const LEVELS = ['full','half','quarter','none'];
+const LVL_ICON = {full:'🟢',half:'🟡',quarter:'🔴',none:'⚫'};
+const R = n => 'R' + (Math.round(n*100)/100).toLocaleString('en-ZA');
+
+// ── ULTRA DATA ────────────────────────────────────────────────────────────────
+// ── LEARNED CATALOG ──
+// Every product you've ordered across 21 Ultra invoices, with the typical quantity
+// you buy per order (median crates/cases). Used by the Buy picker so you can quick-add
+// products even before they're in your stock list. typ = median packs/order, freq = orders/21.
+const CATALOG = [
+  // Beer bottles (crate ×12)
+  {n:'Black Label QT 750ml',t:'beer',pk:12,bn:'Crate',cost:237.99,typ:30,freq:21},
+  {n:'Heineken RET 650ml',t:'beer',pk:12,bn:'Crate',cost:285.99,typ:22,freq:21},
+  {n:'Castle Lite 660ml',t:'beer',pk:12,bn:'Crate',cost:234.99,typ:10,freq:20},
+  {n:'Castle Lager QT 750ml',t:'beer',pk:12,bn:'Crate',cost:237.99,typ:8,freq:20},
+  {n:'Amstel RET 660ml',t:'beer',pk:12,bn:'Crate',cost:211.99,typ:10,freq:20},
+  {n:'Windhoek Lager RET 660ml',t:'beer',pk:12,bn:'Crate',cost:258.99,typ:7,freq:19},
+  {n:'Castle Stout QT 750ml',t:'beer',pk:12,bn:'Crate',cost:278.99,typ:7,freq:19},
+  {n:'Hansa Pils QT 750ml',t:'beer',pk:12,bn:'Crate',cost:238.99,typ:8,freq:19},
+  {n:'Windhoek Draught RET 660ml',t:'beer',pk:12,bn:'Crate',cost:258.99,typ:6,freq:18},
+  {n:'Stella Artois 620ml',t:'beer',pk:12,bn:'Crate',cost:270.99,typ:4,freq:15},
+  {n:'Flying Fish P.Lemon 660ml',t:'beer',pk:12,bn:'Crate',cost:266.99,typ:5,freq:17},
+  {n:'Hunters Gold RET 660ml',t:'beer',pk:12,bn:'Crate',cost:293.99,typ:3,freq:14},
+  {n:'Hunters Dry RET 660ml',t:'beer',pk:12,bn:'Crate',cost:296.99,typ:4,freq:13},
+  {n:'Castle Double Malt 660ml',t:'beer',pk:12,bn:'Crate',cost:238.99,typ:4,freq:11},
+  // Ciders / flavoured bottles
+  {n:'Savanna Half Litre 500ml','t':'cider',pk:12,bn:'Crate',cost:279.99,typ:8,freq:19},
+  {n:'Brutal Fruit Ruby Apple 620ml',t:'cider',pk:12,bn:'Crate',cost:267.99,typ:2,freq:9},
+  {n:'Bernini CAN Mimosa 500ml',t:'cider',pk:12,bn:'Pack',cost:279.99,typ:1,freq:5},
+  // Cans / NRB (case ×24)
+  {n:'Castle Lite Can 500ml',t:'cans',pk:24,bn:'Case',cost:350.99,typ:4,freq:16},
+  {n:'Black Label Can 500ml',t:'cans',pk:24,bn:'Case',cost:324.99,typ:5,freq:16},
+  {n:'Corona Extra NRB 355ml',t:'cans',pk:24,bn:'Case',cost:386.99,typ:5,freq:16},
+  {n:'Heineken Can 500ml',t:'cans',pk:24,bn:'Case',cost:415.99,typ:3,freq:14},
+  {n:'Castle Lager Can 500ml',t:'cans',pk:24,bn:'Case',cost:319.99,typ:2,freq:13},
+  {n:'Castle Stout Can 500ml',t:'cans',pk:24,bn:'Case',cost:350.99,typ:3,freq:12},
+  {n:'Windhoek Draught Can 500ml',t:'cans',pk:24,bn:'Case',cost:369.99,typ:2,freq:11},
+  {n:'Windhoek Lager Can 500ml',t:'cans',pk:24,bn:'Case',cost:369.99,typ:2,freq:9},
+  {n:'Amstel Can 500ml',t:'cans',pk:24,bn:'Case',cost:339.99,typ:1,freq:8},
+  {n:'Heineken NRB 330ml',t:'cans',pk:24,bn:'Case',cost:344.99,typ:2,freq:8},
+  {n:'Stella Artois Can 410ml',t:'cans',pk:24,bn:'Case',cost:344.99,typ:1,freq:6},
+  {n:'Stella Artois NRB 330ml',t:'cans',pk:24,bn:'Case',cost:319.99,typ:1,freq:5},
+  {n:'Extreme Can 440ml',t:'cans',pk:24,bn:'Case',cost:524.99,typ:2,freq:7},
+  {n:'Extreme Can 300ml',t:'cans',pk:24,bn:'Case',cost:366.99,typ:1,freq:4},
+  // Cider / RTD cans
+  {n:'Savanna Dry NRB 330ml',t:'cider',pk:24,bn:'Case',cost:399.99,typ:3,freq:14},
+  {n:'Savanna Angry Lemon NRB 330ml',t:'cider',pk:24,bn:'Case',cost:379.99,typ:1,freq:7},
+  {n:'Flying Fish Can Lemon 500ml',t:'cider',pk:24,bn:'Case',cost:370.99,typ:2,freq:11},
+  {n:'Hunters Gold Can 440ml',t:'cider',pk:24,bn:'Case',cost:387.99,typ:1,freq:6},
+  {n:'Hunters Dry Can 440ml',t:'cider',pk:24,bn:'Case',cost:387.99,typ:1,freq:5},
+  {n:'Brutal Fruit Ruby Apple Can 500ml',t:'cider',pk:24,bn:'Case',cost:434.99,typ:2,freq:9},
+  {n:'Brutal Fruit Strawberry Rouge Can 500ml',t:'cider',pk:24,bn:'Case',cost:434.99,typ:1,freq:4},
+  {n:'Smirnoff Ice Pine Twist 440ml',t:'cider',pk:24,bn:'Case',cost:439.99,typ:1,freq:6},
+  {n:'Smirnoff Storm Pine Can 440ml',t:'cider',pk:24,bn:'Case',cost:439.99,typ:1,freq:3},
+  {n:'Red Square Blue Ice NRB 275ml',t:'cider',pk:24,bn:'Case',cost:384.99,typ:1,freq:5},
+  {n:'Klipdrift + Cola Can 440ml',t:'cider',pk:24,bn:'Case',cost:439.99,typ:1,freq:4},
+  {n:'Belgravia Gin + Dry Lemon 440ml',t:'cider',pk:24,bn:'Case',cost:349.99,typ:1,freq:3},
+  {n:'Belgravia Gin + Tonic 440ml',t:'cider',pk:24,bn:'Case',cost:349.99,typ:1,freq:3},
+  // Spirits (nip packs)
+  {n:'Gordons Gin 200ml',t:'other',pk:12,bn:'Pack',cost:589.00,typ:1,freq:8},
+  {n:'Gordons Gin 750ml',t:'other',pk:12,bn:'Pack',cost:1939.00,typ:1,freq:5},
+  {n:'Gordons Gin 50ml',t:'other',pk:12,bn:'Pack',cost:279.00,typ:1,freq:4},
+  {n:'Bells Whisky 200ml',t:'other',pk:12,bn:'Pack',cost:916.00,typ:1,freq:5},
+  {n:'Bells Whisky 1000ml',t:'other',pk:1,bn:'Bottle',cost:269.99,typ:1,freq:3},
+  {n:'Smirnoff 1818 Vodka 200ml',t:'other',pk:12,bn:'Pack',cost:574.00,typ:1,freq:6},
+  {n:'Amarula Cream 50ml',t:'other',pk:12,bn:'Pack',cost:279.00,typ:1,freq:3},
+  // Mixers / water
+  {n:'Bonaqua Still Water 500ml',t:'other',pk:24,bn:'Pack',cost:109.99,typ:2,freq:8},
+  {n:'Valpre Still Water 500ml',t:'other',pk:24,bn:'Pack',cost:129.99,typ:1,freq:4},
+  {n:'Mini Can Coke 200ml',t:'other',pk:24,bn:'Case',cost:179.99,typ:2,freq:7},
+  {n:'Schweppes Lemonade 200ml',t:'other',pk:24,bn:'Case',cost:149.99,typ:1,freq:5},
+  {n:'Schweppes Dry Lemon 200ml NRB',t:'other',pk:24,bn:'Case',cost:149.99,typ:1,freq:5},
+];
+
+// Real prices from your Ultra Liquors invoices (Jan–Jun 2026, debtor MOR01-JS)
+const ULTRA = [
+  // ── BOTTLES (crate of 12) ──
+  {n:'Black Label QT 750ml',t:'beer',p:'Crate ×12',r:'R 237.99',a:true},
+  {n:'Heineken RET 650ml',t:'beer',p:'Crate ×12',r:'R 285.99',a:true},
+  {n:'Castle Lite 660ml',t:'beer',p:'Crate ×12',r:'R 234.99',a:true},
+  {n:'Castle Lager QT 750ml',t:'beer',p:'Crate ×12',r:'R 237.99',a:true},
+  {n:'Amstel RET 660ml',t:'beer',p:'Crate ×12',r:'R 211.99',a:true},
+  {n:'Windhoek Lager RET 660ml',t:'beer',p:'Crate ×12',r:'R 258.99',a:true},
+  {n:'Castle Stout QT 750ml',t:'beer',p:'Crate ×12',r:'R 278.99',a:true},
+  {n:'Hansa Pils QT 750ml',t:'beer',p:'Crate ×12',r:'R 238.99',a:true},
+  {n:'Windhoek Draught RET 660ml',t:'beer',p:'Crate ×12',r:'R 258.99',a:true},
+  {n:'Stella Artois 620ml',t:'beer',p:'Crate ×12',r:'R 270.99',a:true},
+  {n:'Flying Fish P.Lemon RET 660ml',t:'beer',p:'Crate ×12',r:'R 266.99',a:true},
+  {n:'Hunters Gold RET 660ml',t:'beer',p:'Crate ×12',r:'R 293.99',a:true},
+  {n:'Hunters Dry RET 660ml',t:'beer',p:'Crate ×12',r:'R 296.99',a:true},
+  {n:'Castle Double Malt 660ml',t:'beer',p:'Crate ×12',r:'R 238.99',a:true},
+  {n:'Savanna Half Litre 500ml',t:'cider',p:'Crate ×12',r:'R 279.99',a:true},
+  {n:'Brutal Fruit Ruby Apple 620ml',t:'cider',p:'Crate ×12',r:'R 267.99',a:true},
+  {n:'Bernini CAN Mimosa 500ml',t:'cider',p:'Pack ×12',r:'R 279.99',a:true},
+  // ── CANS / NRB (case of 24) ──
+  {n:'Castle Lite Can 500ml',t:'cans',p:'Case ×24',r:'R 350.99',a:true},
+  {n:'Black Label Can 500ml',t:'cans',p:'Case ×24',r:'R 324.99',a:true},
+  {n:'Corona Extra NRB 355ml',t:'cans',p:'Case ×24',r:'R 386.99',a:true},
+  {n:'Heineken Can 500ml',t:'cans',p:'Case ×24',r:'R 415.99',a:true},
+  {n:'Castle Lager Can 500ml',t:'cans',p:'Case ×24',r:'R 319.99',a:true},
+  {n:'Castle Stout Can 500ml',t:'cans',p:'Case ×24',r:'R 350.99',a:true},
+  {n:'Windhoek Draught Can 500ml',t:'cans',p:'Case ×24',r:'R 369.99',a:true},
+  {n:'Windhoek Lager Can 500ml',t:'cans',p:'Case ×24',r:'R 369.99',a:true},
+  {n:'Amstel Can 500ml',t:'cans',p:'Case ×24',r:'R 339.99',a:true},
+  {n:'Heineken NRB 330ml',t:'cans',p:'Case ×24',r:'R 344.99',a:true},
+  {n:'Stella Artois Can 410ml',t:'cans',p:'Case ×24',r:'R 344.99',a:true},
+  {n:'Stella Artois NRB 330ml',t:'cans',p:'Case ×24',r:'R 319.99',a:true},
+  {n:'Extreme Can 440ml',t:'cans',p:'Case ×24',r:'R 524.99',a:true},
+  {n:'Extreme Can 300ml',t:'cans',p:'Case ×24',r:'R 366.99',a:true},
+  // ── CIDER / RTD CANS (case of 24) ──
+  {n:'Savanna Dry NRB 330ml',t:'cider',p:'Case ×24',r:'R 399.99',a:true},
+  {n:'Savanna Angry Lemon NRB 330ml',t:'cider',p:'Case ×24',r:'R 379.99',a:true},
+  {n:'Flying Fish Can Lemon 500ml',t:'cider',p:'Case ×24',r:'R 370.99',a:true},
+  {n:'Hunters Gold Can 440ml',t:'cider',p:'Case ×24',r:'R 387.99',a:true},
+  {n:'Hunters Dry Can 440ml',t:'cider',p:'Case ×24',r:'R 387.99',a:true},
+  {n:'Brutal Fruit Ruby Apple Can 500ml',t:'cider',p:'Case ×24',r:'R 434.99',a:true},
+  {n:'Brutal Fruit Strawberry Rouge Can 500ml',t:'cider',p:'Case ×24',r:'R 434.99',a:true},
+  {n:'Smirnoff Ice Pine Twist Can 440ml',t:'cider',p:'Case ×24',r:'R 439.99',a:true},
+  {n:'Smirnoff Storm Pine Can 440ml',t:'cider',p:'Case ×24',r:'R 439.99',a:true},
+  {n:'Red Square Blue Ice NRB 275ml',t:'cider',p:'Case ×24',r:'R 384.99',a:true},
+  {n:'Klipdrift + Cola Can 440ml',t:'cider',p:'Case ×24',r:'R 439.99',a:true},
+  {n:'Belgravia Gin + Dry Lemon 440ml',t:'cider',p:'Case ×24',r:'R 349.99',a:true},
+  {n:'Belgravia Gin + Tonic 440ml',t:'cider',p:'Case ×24',r:'R 349.99',a:true},
+  // ── SPIRITS ──
+  {n:'Gordons Gin 200ml ×12',t:'spirit',p:'Pack ×12',r:'R 589.00',a:true},
+  {n:'Gordons Gin 750ml ×12',t:'spirit',p:'Pack ×12',r:'R 1,939.00',a:true},
+  {n:'Gordons Gin 50ml ×12',t:'spirit',p:'Pack ×12',r:'R 279.00',a:true},
+  {n:'Bells Whisky 200ml ×12',t:'spirit',p:'Pack ×12',r:'R 916.00',a:true},
+  {n:'Bells Whisky 1000ml',t:'spirit',p:'Bottle ×1',r:'R 269.99',a:true},
+  {n:'Smirnoff 1818 Vodka 200ml ×12',t:'spirit',p:'Pack ×12',r:'R 574.00',a:true},
+  {n:'Amarula Cream 50ml ×12',t:'spirit',p:'Pack ×12',r:'R 279.00',a:true},
+  // ── MIXERS / WATER ──
+  {n:'Bonaqua Still Water 500ml',t:'other',p:'Pack ×24',r:'R 109.99',a:true},
+  {n:'Valpre Still Water 500ml',t:'other',p:'Pack ×24',r:'R 129.99',a:true},
+  {n:'Mini Can Coke 200ml',t:'other',p:'Case ×24',r:'R 179.99',a:true},
+  {n:'Schweppes Lemonade 200ml',t:'other',p:'Case ×24',r:'R 149.99',a:true},
+  {n:'Schweppes Dry Lemon 200ml NRB',t:'other',p:'Case ×24',r:'R 149.99',a:true},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const SK='mafut5_stock', LK='mafut5_log', HK='mafut5_hist', WK='mafut5_weeks', RU='mafut5_recent', MK='mafut5_meta', EK='mafut5_exp';
+let stock   = JSON.parse(localStorage.getItem(SK)||'[]');
+let logs    = JSON.parse(localStorage.getItem(LK)||'[]');
+let history = JSON.parse(localStorage.getItem(HK)||'[]');
+let weeks   = JSON.parse(localStorage.getItem(WK)||'[]');
+let recentIds = JSON.parse(localStorage.getItem(RU)||'[]');
+let meta    = JSON.parse(localStorage.getItem(MK)||'null') || {weekStart: new Date().toISOString()};
+let expenses = JSON.parse(localStorage.getItem(EK)||'null');
+if(!expenses){
+  expenses = [
+    {id:1,name:'Rent',cat:'rent',amount:0,freq:'weekly'},
+    {id:2,name:'Manager',cat:'manager',amount:0,freq:'weekly'},
+    {id:3,name:'Security',cat:'security',amount:0,freq:'weekly'},
+    {id:4,name:'DJ',cat:'dj',amount:0,freq:'weekly'},
+  ];
+}
+const CK='mafut5_credit', FK='mafut5_freelog';
+let credit  = JSON.parse(localStorage.getItem(CK)||'[]');
+let freeLog = JSON.parse(localStorage.getItem(FK)||'[]');
+if(meta.compLimit===undefined) meta.compLimit=0;
+let filt='All', ufilt='All', cfilt='All', selectedBuyId=null, addOpenLevel='full';
+let countInputs = {};
+
+// item fields: id, name, type, bulk, loose, min, cost, sell, openLevel,
+//              weekOpen (units at week start), weekBought (units bought this week)
+if(!stock.length){
+  // Pre-loaded from your real Ultra Liquors invoice #040782 (18 Jun 2026).
+  // bulk = crates/cases delivered (starting estimate — do a Count to set true on-shelf numbers)
+  // cost = real cost per single bottle/can (invoice price ÷ pack size). sell = 0 → set yours with ✏️.
+  const seed = (id,name,type,pk,bulkName,packsDelivered,packPrice)=>({
+    id,name,type,pk,bulkName,bulk:packsDelivered,loose:0,min:pk,
+    cost:Math.round(packPrice/pk*100)/100, sell:0,
+    weekOpen:packsDelivered*pk, weekBought:0
+  });
+  stock = [
+    // ── BOTTLES (crate of 12) — your staples ──
+    seed(1,'Black Label QT 750ml','beer',12,'Crate',30,237.99),
+    seed(2,'Heineken RET 650ml','beer',12,'Crate',25,285.99),
+    seed(3,'Castle Lite 660ml','beer',12,'Crate',14,234.99),
+    seed(4,'Castle Lager QT 750ml','beer',12,'Crate',5,237.99),
+    seed(5,'Amstel RET 660ml','beer',12,'Crate',6,211.99),
+    seed(6,'Windhoek Lager RET 660ml','beer',12,'Crate',7,258.99),
+    seed(7,'Castle Stout QT 750ml','beer',12,'Crate',6,278.99),
+    seed(8,'Hansa Pils QT 750ml','beer',12,'Crate',8,238.99),
+    seed(9,'Windhoek Draught RET 660ml','beer',12,'Crate',6,258.99),
+    seed(10,'Stella Artois 620ml','beer',12,'Crate',6,270.99),
+    seed(11,'Flying Fish P.Lemon 660ml','beer',12,'Crate',5,266.99),
+    seed(12,'Hunters Gold RET 660ml','beer',12,'Crate',2,293.99),
+    seed(13,'Hunters Dry RET 660ml','beer',12,'Crate',4,296.99),
+    seed(14,'Castle Double Malt 660ml','beer',12,'Crate',4,238.99),
+    // ── CIDERS / FLAVOURED BOTTLES (crate of 12) ──
+    seed(15,'Savanna Half Litre 500ml','cider',12,'Crate',10,279.99),
+    seed(16,'Brutal Fruit Ruby Apple 620ml','cider',12,'Crate',2,267.99),
+    seed(17,'Bernini CAN Mimosa 500ml','cider',12,'Pack',1,279.99),
+    // ── CANS / NRB (case of 24) ──
+    seed(18,'Castle Lite Can 500ml','cans',24,'Case',5,350.99),
+    seed(19,'Black Label Can 500ml','cans',24,'Case',6,324.99),
+    seed(20,'Corona Extra NRB 355ml','cans',24,'Case',6,386.99),
+    seed(21,'Heineken Can 500ml','cans',24,'Case',3,415.99),
+    seed(22,'Castle Lager Can 500ml','cans',24,'Case',2,319.99),
+    seed(23,'Castle Stout Can 500ml','cans',24,'Case',3,350.99),
+    seed(24,'Windhoek Draught Can 500ml','cans',24,'Case',2,369.99),
+    seed(25,'Windhoek Lager Can 500ml','cans',24,'Case',2,369.99),
+    seed(26,'Amstel Can 500ml','cans',24,'Case',1,339.99),
+    seed(27,'Heineken NRB 330ml','cans',24,'Case',2,344.99),
+    seed(28,'Stella Artois Can 410ml','cans',24,'Case',1,344.99),
+    seed(29,'Stella Artois NRB 330ml','cans',24,'Case',1,319.99),
+    seed(30,'Extreme Can 440ml','cans',24,'Case',2,524.99),
+    seed(31,'Extreme Can 300ml','cans',24,'Case',1,366.99),
+    // ── CIDER / RTD CANS (case of 24) ──
+    seed(32,'Savanna Dry NRB 330ml','cider',24,'Case',4,399.99),
+    seed(33,'Savanna Angry Lemon NRB 330ml','cider',24,'Case',1,379.99),
+    seed(34,'Flying Fish Can Lemon 500ml','cider',24,'Case',3,370.99),
+    seed(35,'Hunters Gold Can 440ml','cider',24,'Case',1,387.99),
+    seed(36,'Hunters Dry Can 440ml','cider',24,'Case',1,387.99),
+    seed(37,'Brutal Fruit Ruby Apple Can 500ml','cider',24,'Case',2,434.99),
+    seed(38,'Smirnoff Ice Pine Twist 440ml','cider',24,'Case',1,439.99),
+    seed(39,'Red Square Blue Ice NRB 275ml','cider',24,'Case',1,384.99),
+    seed(40,'Klipdrift + Cola Can 440ml','cider',24,'Case',1,439.99),
+    seed(41,'Belgravia Gin + Dry Lemon 440ml','cider',24,'Case',1,349.99),
+    // ── SPIRIT NIPS (packs of 12) ──
+    seed(42,'Gordons Gin 200ml','spirit',12,'Pack',1,589.00),
+    seed(43,'Bells Whisky 200ml','spirit',12,'Pack',1,916.00),
+    seed(44,'Smirnoff 1818 Vodka 200ml','spirit',12,'Pack',1,574.00),
+    seed(45,'Gordons Gin 50ml','spirit',12,'Pack',1,279.00),
+    seed(46,'Amarula Cream 50ml','spirit',12,'Pack',1,279.00),
+  ];
+  // spirit nip packs are 12-packs, treat like packs (not single open-bottle)
+  stock.forEach(s=>{ if(s.type==='spirit'){ s.type='other'; } });
+  save();
+}
+
+function save(){ localStorage.setItem(SK,JSON.stringify(stock)); }
+function saveLogs(){ localStorage.setItem(LK,JSON.stringify(logs.slice(0,200))); }
+function saveHist(){ localStorage.setItem(HK,JSON.stringify(history.slice(0,30))); }
+function saveWeeks(){ localStorage.setItem(WK,JSON.stringify(weeks.slice(0,52))); }
+function saveRecent(id){ recentIds=[id,...recentIds.filter(x=>x!==id)].slice(0,5); localStorage.setItem(RU,JSON.stringify(recentIds)); }
+function saveMeta(){ localStorage.setItem(MK,JSON.stringify(meta)); }
+function saveExp(){ localStorage.setItem(EK,JSON.stringify(expenses)); }
+function saveCredit(){ localStorage.setItem(CK,JSON.stringify(credit)); }
+function saveFreeLog(){ localStorage.setItem(FK,JSON.stringify(freeLog.slice(0,200))); }
+function addLog(name,desc){ logs.unshift({name,desc,time:new Date().toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})}); saveLogs(); }
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function cfg(item){ return CFG[item.type]||CFG.other; }
+function packSize(item){ return item.pk || cfg(item).bulk; }       // units per crate/case (per-product override)
+function bulkLabel(item){ return item.bulkName || cfg(item).bulkName; }
+function totalUnits(item){ return (item.bulk||0)*packSize(item) + (item.loose||0); }
+function status(item){ const t=totalUnits(item); if(t===0)return'low'; if(t<=item.min)return'warn'; return'ok'; }
+function qcls(n,min){ if(n===0)return'z'; if(n<=min)return'w'; return'g'; }
+// units that left the shelf this week = open + bought − current physical
+function usedThisWeek(item){ return Math.max(0,(item.weekOpen||0)+(item.weekBought||0)-totalUnits(item)); }
+// of those, the free ones earned nothing; the rest were sold (cash or credit)
+function compsThisWeek(item){ return item.weekComps||0; }
+function soldThisWeek(item){ return Math.max(0, usedThisWeek(item)-compsThisWeek(item)); }
+function revenueThisWeek(item){ return soldThisWeek(item)*(item.sell||0); }
+function cogsThisWeek(item){ return soldThisWeek(item)*(item.cost||0); }
+function compCostThisWeek(item){ return compsThisWeek(item)*(item.cost||0); }
+function profitThisWeek(item){ return revenueThisWeek(item)-cogsThisWeek(item); }
+const EXP_CAT={salary:{l:'Staff Salary',i:'👷'},dj:{l:'DJ / Entertainment',i:'🎧'},security:{l:'Security',i:'🛡️'},manager:{l:'Manager',i:'👔'},comps:{l:'Free Drinks (Vibe)',i:'🍸'},rent:{l:'Rent',i:'🏠'},utilities:{l:'Electricity / Water',i:'💡'},other:{l:'Other',i:'📌'}};
+function totalExpenses(){ return expenses.reduce((s,e)=>s+(e.amount||0),0); }
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDash(){
+  const low=stock.filter(i=>status(i)!=='ok');
+  const bulk=stock.reduce((s,i)=>s+(i.bulk||0),0);
+  document.getElementById('s-total').textContent=stock.length;
+  document.getElementById('s-low').textContent=low.length;
+  document.getElementById('s-bulk').textContent=bulk;
+  const owed=outstandingCredit();
+  const credEl=document.getElementById('s-credit');
+  if(credEl) credEl.textContent=owed>=1000?'R'+(owed/1000).toFixed(1)+'k':R(owed);
+
+  const rev=stock.reduce((s,i)=>s+revenueThisWeek(i),0);
+  const prof=stock.reduce((s,i)=>s+profitThisWeek(i),0);
+  const sold=stock.reduce((s,i)=>s+soldThisWeek(i),0);
+  document.getElementById('wb-rev').textContent=R(rev);
+  document.getElementById('wb-profit').textContent=R(prof);
+  document.getElementById('wb-sold').textContent=sold;
+  document.getElementById('wb-since').textContent='Since '+new Date(meta.weekStart).toLocaleDateString('en-ZA',{day:'numeric',month:'short'});
+
+  document.getElementById('d-alert').innerHTML=low.length?`<div class="alert-box">${low.length} item${low.length>1?'s':''} need refilling</div>`:'';
+  document.getElementById('d-low').innerHTML=low.length?low.map(i=>stockCard(i)).join(''):'<div class="empty">All stocked up</div>';
+}
+
+// ── STOCK ─────────────────────────────────────────────────────────────────────
+function renderStock(){
+  const q=(document.getElementById('srch')?.value||'').toLowerCase();
+  const cats=['All',...new Set(stock.map(i=>cfg(i).label))];
+  document.getElementById('filts').innerHTML=cats.map(c=>`<button class="fbtn${c===filt?' active':''}" onclick="setFilt('${c}')">${c}</button>`).join('');
+  let items=stock;
+  if(filt!=='All') items=items.filter(i=>cfg(i).label===filt);
+  if(q) items=items.filter(i=>i.name.toLowerCase().includes(q));
+  document.getElementById('stock-list').innerHTML=items.length?items.map(i=>stockCard(i)).join(''):'<div class="empty"><div class="ico">🔍</div>Nothing found</div>';
+}
+function setFilt(c){ filt=c; renderStock(); }
+
+function stockCard(item){
+  const c=cfg(item), sc=status(item), total=totalUnits(item);
+  const priceLine = item.sell ? `Buy ${R(item.cost||0)} · Sell ${R(item.sell)}` : (item.cost?`Cost ${R(item.cost)}`:'');
+  const qInput=(field,val,cls)=>`<input class="qn-input ${cls}" type="number" inputmode="numeric" min="0" value="${val}"
+    onfocus="this.select()" onchange="setQty(${item.id},'${field}',this.value)"/>`;
+  if(item.type==='spirit'){
+    const icon=LVL_ICON[item.openLevel||'none'];
+    return `<div class="scard ${sc}">
+      <div class="scard-head"><div><div class="scard-name">${item.name}</div><span class="tag ${c.tag}">${c.label}</span></div>
+        <div style="display:flex;gap:4px;align-items:center;"><button class="scard-del" style="font-size:15px;" onclick="editPrices(${item.id})" title="Edit prices">✏️</button><button class="scard-del" onclick="delItem(${item.id})">×</button></div></div>
+      <div class="urow"><span class="ulabel"><strong>Sealed bottles</strong></span>
+        <div class="qc"><button class="qb" onclick="adj(${item.id},'bulk',-1)">−</button>
+          ${qInput('bulk',item.bulk||0,qcls(item.bulk||0,item.min))}
+          <button class="qb" onclick="adj(${item.id},'bulk',1)">+</button></div></div>
+      <div class="urow"><span class="ulabel">Open bottle ${icon}</span>
+        <button class="qb" style="width:auto;padding:0 12px;border-radius:14px;font-size:11px;font-weight:700;" onclick="cycleLevel(${item.id})">↻ ${item.openLevel||'none'}</button></div>
+      <div class="card-footer"><span>${priceLine}</span><span class="total">${item.bulk||0} sealed</span></div>
+    </div>`;
+  }
+  return `<div class="scard ${sc}">
+    <div class="scard-head"><div><div class="scard-name">${item.name}</div><span class="tag ${c.tag}">${c.label}</span></div>
+      <div style="display:flex;gap:4px;align-items:center;"><button class="scard-del" style="font-size:15px;" onclick="editPrices(${item.id})" title="Edit prices">✏️</button><button class="scard-del" onclick="delItem(${item.id})">×</button></div></div>
+    <div class="urow"><span class="ulabel"><strong>${bulkLabel(item)}s</strong> <span style="font-size:10px;">(×${packSize(item)})</span></span>
+      <div class="qc"><button class="qb" onclick="adj(${item.id},'bulk',-1)">−</button>
+        ${qInput('bulk',item.bulk||0,qcls(item.bulk||0,0))}
+        <button class="qb" onclick="adj(${item.id},'bulk',1)">+</button></div></div>
+    <div class="urow"><span class="ulabel">Loose ${c.unit}</span>
+      <div class="qc"><button class="qb" onclick="adj(${item.id},'loose',-1)">−</button>
+        ${qInput('loose',item.loose||0,qcls(item.loose||0,item.min))}
+        <button class="qb" onclick="adj(${item.id},'loose',1)">+</button></div></div>
+    <div class="card-footer"><span>Total: <strong>${total} ${c.unit}</strong> · refill &lt; ${item.min}</span><span class="total">${priceLine}</span></div>
+  </div>`;
+}
+function setQty(id,field,val){
+  const item=stock.find(i=>i.id===id); if(!item) return;
+  const n=Math.max(0,parseInt(val)||0);
+  const old=item[field]||0;
+  if(n===old) return;
+  item[field]=n;
+  addLog(item.name,`${field==='bulk'?bulkLabel(item):'Loose'} set to ${n}`);
+  save(); renderDash(); renderStock(); renderLog();
+}
+
+function adj(id,field,delta){
+  const item=stock.find(i=>i.id===id); if(!item) return;
+  item[field]=Math.max(0,(item[field]||0)+delta);
+  addLog(item.name,`${field==='bulk'?bulkLabel(item):'Loose'}: ${delta>0?'+':''}${delta}`);
+  save(); renderDash(); renderStock(); renderLog();
+}
+function cycleLevel(id){
+  const item=stock.find(i=>i.id===id); if(!item) return;
+  item.openLevel=LEVELS[(LEVELS.indexOf(item.openLevel||'full')+1)%LEVELS.length];
+  addLog(item.name,`Open bottle → ${item.openLevel}`);
+  save(); renderDash(); renderStock(); renderLog();
+}
+function startFresh(){
+  if(!confirm('Clear all demo beers and start fresh?\n\nThis wipes products, counts, logs, free-drink records, credit book and past weeks. Your expense list stays. This cannot be undone.')) return;
+  if(!confirm('Are you sure? Everything except expenses will be erased.')) return;
+  stock=[]; logs=[]; history=[]; weeks=[]; credit=[]; freeLog=[]; recentIds=[];
+  meta={weekStart:new Date().toISOString(),compLimit:0};
+  save(); saveLogs(); saveHist(); saveWeeks(); saveCredit(); saveFreeLog();
+  localStorage.setItem(RU,JSON.stringify(recentIds)); saveMeta();
+  renderDash(); renderStock(); renderLog();
+  alert('✅ Fresh start! Go to the Buy tab → "Add New Product" to enter your real beers.');
+  tab('buy');
+}
+function delItem(id){
+  if(!confirm('Remove this item?')) return;
+  stock=stock.filter(i=>i.id!==id); save(); renderDash(); renderStock();
+}
+
+// ── BUY / PICKER ──────────────────────────────────────────────────────────────
+function pickerOpen(){ pickerSearch(); document.getElementById('picker-dropdown').classList.add('open'); }
+function pickerBlur(){ setTimeout(()=>document.getElementById('picker-dropdown').classList.remove('open'),180); }
+function pickerSearch(){
+  const q=(document.getElementById('picker-search').value||'').toLowerCase().trim();
+  const dd=document.getElementById('picker-dropdown'); dd.classList.add('open'); dd.innerHTML='';
+  if(!q && recentIds.length){
+    const rec=recentIds.map(id=>stock.find(i=>i.id===id)).filter(Boolean);
+    if(rec.length){ dd.innerHTML+=`<div class="picker-section-title">⏱ Recently Used</div>`+rec.map(pickerOptionHTML).join(''); }
+  }
+  const all=[...stock].sort((a,b)=>a.name.localeCompare(b.name));
+  const f=q?all.filter(i=>i.name.toLowerCase().includes(q)):all;
+  if(f.length){ dd.innerHTML+=`<div class="picker-section-title">${q?`Results for "${q}"`:'🍺 Your Stock A–Z'}</div>`+f.map(pickerOptionHTML).join(''); }
+  // Catalog: products you've bought before from Ultra but aren't in stock yet
+  const stockNames=new Set(stock.map(s=>s.name.toLowerCase()));
+  let cat=CATALOG.filter(c=>!stockNames.has(c.n.toLowerCase()));
+  if(q) cat=cat.filter(c=>c.n.toLowerCase().includes(q));
+  cat.sort((a,b)=>b.freq-a.freq);
+  if(cat.length){
+    dd.innerHTML+=`<div class="picker-section-title">📒 From your Ultra orders (tap to add)</div>`+
+      cat.slice(0,q?20:8).map(c=>catalogOptionHTML(c)).join('');
+  }
+  if(!f.length && !cat.length){
+    dd.innerHTML+=`<div style="padding:16px 14px;font-size:13px;color:var(--dim);">No product found — add a brand-new one below ↓</div>`;
+  }
+}
+function catalogOptionHTML(c){
+  const tagClass={beer:'t-beer',cans:'t-cans',cider:'t-cider',other:'t-other',spirit:'t-spirit'}[c.t]||'t-other';
+  const label={beer:'Beer',cans:'Cans',cider:'Cider',other:'Spirit/Mixer',spirit:'Spirit'}[c.t]||'Other';
+  return `<div class="picker-option" onmousedown="addFromCatalog('${c.n.replace(/'/g,"\\'")}')">
+    <div><div class="po-name">${c.n}</div>
+      <div class="po-stock" style="color:var(--gold2);">＋ Add · typically buy ${c.typ} ${c.bn.toLowerCase()}${c.typ>1?'s':''} · seen on ${c.freq}/21 orders</div></div>
+    <span class="po-tag ${tagClass}">${label}</span></div>`;
+}
+function addFromCatalog(name){
+  const c=CATALOG.find(x=>x.n===name); if(!c) return;
+  const id=Math.max(0,...stock.map(s=>s.id))+1;
+  const item={id,name:c.n,type:c.t,pk:c.pk,bulkName:c.bn,bulk:0,loose:0,min:c.pk,cost:Math.round(c.cost/c.pk*100)/100,sell:0,weekOpen:0,weekBought:0};
+  stock.push(item); save(); addLog(c.n,'Added from Ultra catalog');
+  selectBuyItem(id); renderStock(); renderDash();
+}
+function pickerOptionHTML(item){
+  const c=cfg(item),t=totalUnits(item),sc=status(item);
+  const dot=sc==='low'?'🔴':sc==='warn'?'🟡':'🟢';
+  return `<div class="picker-option" onmousedown="selectBuyItem(${item.id})">
+    <div><div class="po-name">${item.name}</div><div class="po-stock">${dot} ${t} ${c.unit} in stock</div></div>
+    <span class="po-tag ${c.tag}">${c.label}</span></div>`;
+}
+function selectBuyItem(id){
+  const item=stock.find(i=>i.id===id); if(!item) return;
+  selectedBuyId=id; const c=cfg(item);
+  document.getElementById('picker-search').value=item.name;
+  document.getElementById('picker-dropdown').classList.remove('open');
+  const disp=document.getElementById('selected-item-display'); disp.style.display='block';
+  disp.innerHTML=`<div class="selected-item-card"><div><div class="si-name">${item.name}</div>
+    <div class="si-info"><span class="tag ${c.tag}" style="margin:0;">${c.label}</span> &nbsp; ${totalUnits(item)} ${c.unit} in stock</div></div>
+    <button class="si-clear" onclick="clearBuySelection()">✕</button></div>`;
+  const bulkSec=document.getElementById('buy-bulk-section'), spiritSec=document.getElementById('buy-spirit-section');
+  if(item.type==='spirit'){ bulkSec.style.display='none'; spiritSec.style.display='block'; }
+  else { spiritSec.style.display='none'; bulkSec.style.display='block';
+    document.getElementById('buy-bulk-lbl').textContent=`${bulkLabel(item)}s bought`;
+    document.getElementById('buy-bulk-hint').textContent=`1 ${bulkLabel(item).toLowerCase()} = ${packSize(item)} ${c.unit}`; }
+  updateBuyPreview();
+}
+function clearBuySelection(){
+  selectedBuyId=null;
+  document.getElementById('picker-search').value='';
+  document.getElementById('selected-item-display').style.display='none';
+  document.getElementById('buy-bulk-section').style.display='none';
+  document.getElementById('buy-spirit-section').style.display='none';
+  document.getElementById('picker-search').focus();
+}
+function populateBuySelect(){}
+function updateBuyPreview(){
+  const item=stock.find(i=>i.id===selectedBuyId); if(!item) return;
+  const c=cfg(item);
+  if(item.type==='spirit'){
+    const qty=parseInt(document.getElementById('buy-spirit-qty').value)||0;
+    document.getElementById('buy-spirit-preview').innerHTML=qty?`Adding <strong>${qty} bottle${qty>1?'s':''}</strong> of ${item.name}`:'Enter bottles bought';
+  } else {
+    const bulk=parseInt(document.getElementById('buy-bulk').value)||0, loose=parseInt(document.getElementById('buy-loose').value)||0;
+    const total=bulk*packSize(item)+loose;
+    document.getElementById('buy-preview').innerHTML=total?`Adding <strong>${bulk} ${bulkLabel(item).toLowerCase()}${bulk!==1?'s':''}</strong> + <strong>${loose} loose</strong> = <strong>${total} ${c.unit}</strong>`:`Enter ${bulkLabel(item).toLowerCase()}s bought`;
+  }
+}
+function recordBuy(){
+  const item=stock.find(i=>i.id===selectedBuyId); if(!item){ alert('Select an item first'); return; }
+  const c=cfg(item); let addedUnits=0;
+  if(item.type==='spirit'){
+    const qty=parseInt(document.getElementById('buy-spirit-qty').value)||0;
+    if(!qty){ alert('Enter bottles bought'); return; }
+    item.bulk=(item.bulk||0)+qty; addedUnits=qty;
+    const paid=parseFloat(document.getElementById('buy-spirit-cost').value)||0;
+    if(paid>0) item.cost=Math.round(paid/qty*100)/100;
+    addLog(item.name,`Bought: +${qty} bottle${qty>1?'s':''}`);
+    document.getElementById('buy-spirit-qty').value=''; document.getElementById('buy-spirit-cost').value='';
+  } else {
+    const bulk=parseInt(document.getElementById('buy-bulk').value)||0, loose=parseInt(document.getElementById('buy-loose').value)||0;
+    if(!bulk && !loose){ alert('Enter crates/cases bought'); return; }
+    item.bulk=(item.bulk||0)+bulk; item.loose=(item.loose||0)+loose;
+    addedUnits=bulk*packSize(item)+loose;
+    const paid=parseFloat(document.getElementById('buy-cost').value)||0;
+    if(paid>0 && addedUnits>0) item.cost=Math.round(paid/addedUnits*100)/100;
+    addLog(item.name,`Bought: +${bulk} ${bulkLabel(item).toLowerCase()}${bulk!==1?'s':''}, +${loose} loose`);
+    document.getElementById('buy-bulk').value=''; document.getElementById('buy-loose').value=''; document.getElementById('buy-cost').value='';
+  }
+  item.weekBought=(item.weekBought||0)+addedUnits;
+  saveRecent(item.id); save(); renderDash(); renderStock(); renderLog();
+  selectBuyItem(item.id);
+  alert(`✅ Stocked up!\n${item.name}: now ${totalUnits(item)} ${c.unit} total.`);
+}
+
+// ── ADD PRODUCT ───────────────────────────────────────────────────────────────
+function populateCatalogDatalist(){
+  const dl=document.getElementById('catalog-names'); if(!dl) return;
+  const stockNames=new Set(stock.map(s=>s.name.toLowerCase()));
+  const avail=CATALOG.filter(c=>!stockNames.has(c.n.toLowerCase()));
+  dl.innerHTML=avail.map(c=>`<option value="${c.n}">${c.bn} ×${c.pk} · R${(c.cost/c.pk).toFixed(2)}/unit</option>`).join('');
+}
+function catalogAutofill(){
+  const name=document.getElementById('a-name').value.trim();
+  const c=CATALOG.find(x=>x.n.toLowerCase()===name.toLowerCase());
+  const hint=document.getElementById('a-cat-hint');
+  if(!c){ if(hint){ hint.textContent='Brand-new product — fill in the fields below.'; hint.style.color='var(--yellow)'; } return; }
+  // Map catalog type to form type
+  const t=(c.t==='other'&&c.bn==='Bottle')?'spirit':c.t;
+  document.getElementById('a-type').value=t; typeChanged();
+  document.getElementById('a-bulkname').value=c.bn;
+  document.getElementById('a-pk').value=c.pk;
+  document.getElementById('a-cost').value=(c.cost/c.pk).toFixed(2);
+  document.getElementById('a-min').value=c.pk;
+  if(hint){ hint.innerHTML=`✓ Filled from catalog: <strong>${c.bn} ×${c.pk}</strong> · cost R${(c.cost/c.pk).toFixed(2)}/unit · typical order ${c.typ} ${c.bn.toLowerCase()}${c.typ>1?'s':''}`; hint.style.color='var(--green)'; }
+}
+function typeChanged(){
+  const t=document.getElementById('a-type').value, sp=t==='spirit';
+  document.getElementById('a-bulk-fields').style.display=sp?'none':'block';
+  document.getElementById('a-spirit-fields').style.display=sp?'block':'none';
+  if(!sp){ const c=CFG[t]||CFG.other;
+    document.getElementById('a-bulk-lbl').textContent=`Starting ${c.bulkName.toLowerCase()}s`;
+    document.getElementById('a-bulk-hint').textContent=`1 ${c.bulkName.toLowerCase()} = ${c.bulk} ${c.unit}`; }
+}
+function selLvl(el,g){ document.querySelectorAll(`#${g} .slvl`).forEach(e=>e.classList.remove('active')); el.classList.add('active'); addOpenLevel=el.dataset.v; }
+function addProduct(){
+  const name=document.getElementById('a-name').value.trim(), type=document.getElementById('a-type').value;
+  if(!name){ alert('Enter a product name'); return; }
+  // pack size + bulk label from catalog (if user picked one) else from type defaults
+  const cat=CATALOG.find(x=>x.n.toLowerCase()===name.toLowerCase());
+  const pk=cat?cat.pk:(parseInt(document.getElementById('a-pk').value)||(CFG[type]||CFG.other).bulk);
+  const bulkName=cat?cat.bn:(document.getElementById('a-bulkname').value||(CFG[type]||CFG.other).bulkName);
+  const cost=parseFloat(document.getElementById('a-cost').value)||0, sell=parseFloat(document.getElementById('a-sell').value)||0;
+  const id=Date.now(); let item;
+  if(type==='spirit'){
+    const b=parseInt(document.getElementById('a-sbottles').value)||0;
+    item={id,name,type,bulk:b,loose:0,min:parseInt(document.getElementById('a-smin')?.value)||1,cost,sell,openLevel:addOpenLevel,weekOpen:b,weekBought:0};
+  } else {
+    const b=parseInt(document.getElementById('a-bulk').value)||0, l=parseInt(document.getElementById('a-loose').value)||0;
+    item={id,name,type,pk,bulkName,bulk:b,loose:l,min:parseInt(document.getElementById('a-min').value)||pk,cost,sell,weekOpen:b*pk+l,weekBought:0};
+  }
+  stock.push(item); addLog(name,'Product created');
+  save(); renderDash(); renderStock(); populateCatalogDatalist();
+  ['a-name','a-bulk','a-loose','a-min','a-sbottles','a-cost','a-sell','a-pk','a-bulkname'].forEach(x=>{const e=document.getElementById(x);if(e)e.value='';});
+  tab('stock');
+}
+
+// ── COUNT ─────────────────────────────────────────────────────────────────────
+function renderCount(){
+  const cats=['All',...new Set(stock.map(i=>cfg(i).label))];
+  document.getElementById('c-filts').innerHTML=cats.map(c=>`<button class="fbtn${c===cfilt?' active':''}" onclick="setCFilt('${c}')">${c}</button>`).join('');
+  let items=stock;
+  if(cfilt!=='All') items=items.filter(i=>cfg(i).label===cfilt);
+  document.getElementById('count-list').innerHTML=items.map(item=>{
+    const c=cfg(item), sysBulk=item.bulk||0, sysLoose=item.loose||0, sysTotal=totalUnits(item);
+    const inp=countInputs[item.id]||{bulk:'',loose:''};
+    if(item.type==='spirit'){
+      const cnt=inp.bulk!==''?parseInt(inp.bulk):null;
+      const v=cnt!==null?cnt-sysBulk:null;
+      const vc=v===null?'vn':v<0?'vr':v>0?'vy':'vg';
+      const vt=v===null?'not counted':v===0?'✓ matches':v>0?`+${v} extra`:`${v} missing`;
+      return `<div class="ccard"><div class="ccard-head"><div class="ccard-name">${item.name}</div><span class="tag ${c.tag}">${c.label}</span></div>
+        <div class="sys-line">System has: <span>${sysBulk} sealed</span> + open (${LVL_ICON[item.openLevel||'none']})</div>
+        <div class="count-fields"><div class="count-field-row"><label>Sealed bottles counted:</label>
+          <input class="cfield${inp.bulk!==''?' changed':''}" type="number" min="0" placeholder="0" value="${inp.bulk}" oninput="setCountVal(${item.id},'bulk',this.value)"/></div></div>
+        <div class="variance-row"><span style="color:var(--dim);font-size:11px;">Variance</span><span class="vbadge ${vc}">${vt}</span></div></div>`;
+    }
+    const cb=inp.bulk!==''?parseInt(inp.bulk):null, cl=inp.loose!==''?parseInt(inp.loose):null;
+    const has=cb!==null||cl!==null, ct=(cb||0)*packSize(item)+(cl||0), v=has?ct-sysTotal:null;
+    const vc=v===null?'vn':v<0?'vr':v>0?'vy':'vg';
+    const vt=v===null?'not counted':v===0?'✓ matches':v>0?`+${v} extra`:`${v} missing`;
+    return `<div class="ccard"><div class="ccard-head"><div class="ccard-name">${item.name}</div><span class="tag ${c.tag}">${c.label}</span></div>
+      <div class="sys-line">System: <span>${sysBulk} ${bulkLabel(item).toLowerCase()}s + ${sysLoose} loose</span> = <span>${sysTotal} ${c.unit}</span></div>
+      <div class="count-fields">
+        <div class="count-field-row"><label>Full ${bulkLabel(item).toLowerCase()}s left:</label>
+          <input class="cfield${inp.bulk!==''?' changed':''}" type="number" min="0" placeholder="0" value="${inp.bulk}" oninput="setCountVal(${item.id},'bulk',this.value)"/></div>
+        <div class="count-field-row"><label>Loose ${c.unit} left:</label>
+          <input class="cfield${inp.loose!==''?' changed':''}" type="number" min="0" placeholder="0" value="${inp.loose}" oninput="setCountVal(${item.id},'loose',this.value)"/></div></div>
+      <div class="variance-row"><span style="color:var(--dim);font-size:11px;">Variance ${has?'('+ct+' counted)':''}</span><span class="vbadge ${vc}">${vt}</span></div></div>`;
+  }).join('');
+  document.getElementById('count-actions').style.display=Object.keys(countInputs).length?'flex':'none';
+  renderCountHist();
+}
+function setCFilt(c){ cfilt=c; renderCount(); }
+function setCountVal(id,field,val){ if(!countInputs[id])countInputs[id]={bulk:'',loose:''}; countInputs[id][field]=val; renderCount(); }
+function clearCount(){ countInputs={}; renderCount(); }
+function saveCount(){
+  const entries=Object.entries(countInputs).filter(([,v])=>v.bulk!==''||v.loose!=='');
+  if(!entries.length){ alert('Nothing counted yet'); return; }
+  const results=[];
+  entries.forEach(([sid,inp])=>{
+    const item=stock.find(i=>i.id===parseInt(sid)); if(!item) return;
+    const c=cfg(item), before=totalUnits(item);
+    if(item.type==='spirit'){
+      const cnt=inp.bulk!==''?parseInt(inp.bulk):item.bulk||0;
+      results.push({name:item.name,counted:cnt,variance:cnt-(item.bulk||0),unit:'bottles'});
+      item.bulk=cnt;
+    } else {
+      const nb=inp.bulk!==''?parseInt(inp.bulk):item.bulk||0, nl=inp.loose!==''?parseInt(inp.loose):item.loose||0;
+      const ct=nb*packSize(item)+nl;
+      results.push({name:item.name,counted:ct,detail:`${nb} ${bulkLabel(item).toLowerCase()}s + ${nl} loose`,variance:ct-before,unit:c.unit});
+      item.bulk=nb; item.loose=nl;
+    }
+  });
+  save();
+  history.unshift({time:new Date().toLocaleString('en-ZA',{dateStyle:'medium',timeStyle:'short'}),items:results});
+  saveHist(); addLog('Stock Count',`${results.length} items counted`);
+  countInputs={}; renderDash(); renderStock(); renderLog();
+  const sh=results.filter(r=>r.variance<0);
+  alert(`✅ Count saved!\n${results.length} items updated.\n${sh.length?sh.length+' shortages found.':'No shortages.'}\n\nCheck the Report tab to see your sales & profit, then "Close Week".`);
+  renderCount();
+}
+function renderCountHist(){
+  const el=document.getElementById('count-hist');
+  if(!history.length){ el.innerHTML='<div class="empty"><div class="ico">📋</div>No counts yet</div>'; return; }
+  el.innerHTML=history.map(h=>{
+    const sh=h.items.filter(i=>i.variance<0);
+    return `<div class="hcard"><div class="hcard-top"><div class="hdate">${h.time}</div>
+      <span class="hbadge ${sh.length?'hb-warn':'hb-ok'}">${sh.length?sh.length+' short':'All OK'}</span></div>
+      ${h.items.map(i=>`<div class="hrow"><span>${i.name}${i.detail?' ('+i.detail+')':''}</span>
+        <span style="font-weight:700;color:${i.variance<0?'var(--red)':i.variance>0?'var(--yellow)':'var(--green)'}">${i.variance===0?'✓':i.variance>0?'+'+i.variance:i.variance} ${i.unit}</span></div>`).join('')}</div>`;
+  }).join('');
+}
+
+// ── FREE DRINKS (COMPS) ───────────────────────────────────────────────────────
+function removeUnits(item, n){
+  // take from loose first, then break open bulk
+  let need=n;
+  const take=Math.min(item.loose||0, need); item.loose=(item.loose||0)-take; need-=take;
+  while(need>0 && (item.bulk||0)>0){ item.bulk--; item.loose=(item.loose||0)+packSize(item); const t=Math.min(item.loose,need); item.loose-=t; need-=t; }
+  if(item.loose<0) item.loose=0;
+  return n-need; // actually removed
+}
+function freeProductOptions(){
+  return [...stock].sort((a,b)=>a.name.localeCompare(b.name))
+    .map(i=>`<option value="${i.id}">${i.name} (${totalUnits(i)} left)</option>`).join('');
+}
+function totalFreeThisWeek(){ return stock.reduce((s,i)=>s+compsThisWeek(i),0); }
+
+function renderFree(){
+  document.getElementById('free-item').innerHTML=freeProductOptions();
+  const given=totalFreeThisWeek();
+  document.getElementById('free-count').textContent=given;
+  const lim=meta.compLimit||0;
+  const sub=lim>0?`limit ${lim} · ${Math.max(0,lim-given)} left`:'no limit set — tap below to set one';
+  document.getElementById('free-sub').textContent=sub;
+  const pct=lim>0?Math.min(100,Math.round(given/lim*100)):0;
+  const bar=document.getElementById('free-bar');
+  bar.style.width=pct+'%';
+  bar.style.background = lim>0 && given>=lim ? 'var(--red)' : 'var(--purple)';
+  document.getElementById('free-bar-lbl').textContent = lim>0 ? `${given} / ${lim} given` : `${given} given`;
+
+  const wk=freeLog.filter(f=>new Date(f.ts)>=new Date(meta.weekStart));
+  const reasonIcon={girls:'💃',dj:'🎧',staff:'👷',other:'📌'};
+  document.getElementById('free-list').innerHTML=wk.length?wk.map(f=>`
+    <div class="litem"><div><div class="lname">${reasonIcon[f.reason]||'📌'} ${f.qty} × ${f.name}</div>
+      <div class="ltime">${f.time} · ${f.reason}</div></div>
+      <div class="ldesc" style="color:var(--purple)">−${R(f.cost)}</div></div>`).join('')
+    :'<div class="empty"><div class="ico">🍸</div>No free drinks yet this week</div>';
+}
+function setFreeLimit(){
+  const v=prompt('Weekly free-beer limit (for the vibe). Set 0 for no limit:', meta.compLimit||0);
+  if(v===null) return;
+  meta.compLimit=parseInt(v)||0; saveMeta(); renderFree();
+}
+function giveFree(){
+  const id=parseInt(document.getElementById('free-item').value);
+  const item=stock.find(i=>i.id===id); if(!item){ alert('Pick a beer'); return; }
+  const qty=parseInt(document.getElementById('free-qty').value)||0;
+  const reason=document.getElementById('free-reason').value;
+  if(qty<1){ alert('Enter how many'); return; }
+  if(totalUnits(item)<qty){ alert(`Only ${totalUnits(item)} left in stock`); return; }
+  const lim=meta.compLimit||0, given=totalFreeThisWeek();
+  if(lim>0 && given+qty>lim){
+    if(!confirm(`⚠️ This goes over your weekly limit of ${lim} (already ${given}). Give anyway?`)) return;
+  }
+  removeUnits(item, qty);
+  item.weekComps=(item.weekComps||0)+qty;
+  const cost=qty*(item.cost||0);
+  freeLog.unshift({ts:new Date().toISOString(),time:new Date().toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'}),name:item.name,qty,reason,cost});
+  saveFreeLog(); save(); addLog(item.name,`Free ${qty} (${reason})`);
+  document.getElementById('free-qty').value='1';
+  renderFree(); renderDash(); renderStock();
+}
+
+// ── CREDIT BOOK ───────────────────────────────────────────────────────────────
+// Each credit entry: {id, name, phone, type:'credit'|'payment', amount, note, date, time}
+function custKey(name){ return name.trim().toLowerCase(); }
+function migrateCredit(){
+  let changed=false;
+  credit.forEach(c=>{
+    if(!c.type){ c.type='credit'; changed=true; }
+    if(c.phone===undefined){ c.phone=''; changed=true; }
+    // Old "paid" flag: keep credit entry, and we'll auto-create a matching payment if not already
+    if(c.paid && !c._mig){ c._mig=true; changed=true;
+      credit.push({id:Date.now()+Math.random(),name:c.name,phone:c.phone||'',type:'payment',amount:c.amount,note:'(legacy paid)',date:c.paidDate||c.date,time:''});
+    }
+  });
+  if(changed) saveCredit();
+}
+migrateCredit();
+function customerSummary(){
+  const map=new Map();
+  credit.forEach(t=>{
+    const k=custKey(t.name); if(!k) return;
+    if(!map.has(k)) map.set(k,{name:t.name,phone:t.phone||'',given:0,paid:0,txns:[],lastTime:0});
+    const c=map.get(k);
+    if(t.phone) c.phone=t.phone;
+    if(t.type==='payment') c.paid+=t.amount||0; else c.given+=t.amount||0;
+    c.txns.push(t);
+    const stamp=(typeof t.id==='number')?t.id:Date.parse(t.date||'')||0;
+    if(stamp>c.lastTime) c.lastTime=stamp;
+  });
+  const out=[...map.values()].map(c=>({...c,balance:Math.round((c.given-c.paid)*100)/100}));
+  out.sort((a,b)=>b.balance-a.balance || b.lastTime-a.lastTime);
+  return out;
+}
+function outstandingCredit(){ return customerSummary().filter(c=>c.balance>0.009).reduce((s,c)=>s+c.balance,0); }
+function normPhone(p){ // SA number → wa.me format
+  let d=(p||'').replace(/\D/g,''); if(!d) return '';
+  if(d.startsWith('0')) d='27'+d.slice(1);
+  else if(d.startsWith('27')) d=d;
+  else if(d.length===9) d='27'+d;
+  return d;
+}
+function waLink(phone,msg){ const p=normPhone(phone); const t=encodeURIComponent(msg);
+  return p? `https://wa.me/${p}?text=${t}` : `https://wa.me/?text=${t}`; }
+function smsLink(phone,msg){ return `sms:${normPhone(phone)||''}?body=${encodeURIComponent(msg)}`; }
+function saveBarPhone(){
+  meta.barPhone=document.getElementById('bar-phone').value.trim();
+  saveMeta();
+  const st=document.getElementById('bar-phone-status');
+  if(meta.barPhone){ st.textContent='✓ Saved. Notifications will be sent to '+meta.barPhone; st.style.color='var(--green)'; }
+  else { st.textContent='Set this once. Every time you add credit or record a payment, WhatsApp opens with a log message to YOU.'; st.style.color=''; }
+}
+function barContactLine(){ return meta.barPhone? `\n— Mafut Nation 🍺 (${meta.barPhone})` : `\n— Mafut Nation 🍺`; }
+function notifyCredit(c,justAdded){
+  if(!c.phone){ if(!confirm(`No phone saved for ${c.name}. Save anyway without sending WhatsApp?`)) return false; return true; }
+  const last=c.txns[0]||{};
+  const amt=(justAdded||last.amount||0).toFixed(2);
+  const msg=`Hi ${c.name}, this is Mafut Nation. You've taken R${amt} on credit today${last.note?` (${last.note})`:''}. Your balance is now R${c.balance.toFixed(2)}. Please settle when you get paid. Thank you! 🍻${barContactLine()}`;
+  window.open(waLink(c.phone,msg),'_blank');
+}
+function notifyPayment(c,paid){
+  if(!c.phone) return;
+  const msg=c.balance<=0.009
+    ? `Hi ${c.name}, we received your payment of R${paid.toFixed(2)}. Your account is fully settled — thank you! 🍻${barContactLine()}`
+    : `Hi ${c.name}, we received your payment of R${paid.toFixed(2)}. Your remaining balance is R${c.balance.toFixed(2)}. Thank you!${barContactLine()}`;
+  window.open(waLink(c.phone,msg),'_blank');
+}
+function notifyCustomer(c){
+  if(!c.phone){ alert(`No phone number saved for ${c.name}. Tap "+ Credit" to add one.`); return; }
+  const msg=c.balance>0
+    ? `Hi ${c.name}, friendly reminder from Mafut Nation — your tab is at R${c.balance.toFixed(2)}. Please settle when you can. Thank you! 🍻${barContactLine()}`
+    : `Hi ${c.name}, thanks from Mafut Nation — your account is fully settled. 🍻${barContactLine()}`;
+  window.open(waLink(c.phone,msg),'_blank');
+}
+
+function renderCredit(){
+  const bp=document.getElementById('bar-phone');
+  if(bp && meta.barPhone && !bp.value){ bp.value=meta.barPhone;
+    const st=document.getElementById('bar-phone-status'); if(st){ st.textContent='✓ Notifications go to '+meta.barPhone; st.style.color='var(--green)'; } }
+  const customers=customerSummary();
+  const owing=customers.filter(c=>c.balance>0.009);
+  const settled=customers.filter(c=>c.balance<=0.009 && c.given>0);
+  document.getElementById('credit-total').textContent=R(outstandingCredit());
+  document.getElementById('credit-sub').textContent=`${owing.length} ${owing.length===1?'person owes':'people owe'} you`;
+  document.getElementById('credit-owing').innerHTML=owing.length?owing.map(custCard).join(''):'<div class="empty">All clear</div>';
+  document.getElementById('credit-paid').innerHTML=settled.length?settled.slice(0,20).map(c=>`
+    <div class="litem"><div><div class="lname" style="color:var(--text)">${c.name}</div>
+      <div class="ltime">paid R${c.paid.toFixed(2)} of R${c.given.toFixed(2)}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="ldesc" style="color:var(--green)">Settled ✓</span>
+        <button class="scard-del" onclick="delCustomer('${custKey(c.name)}')">×</button></div></div>`).join('')
+    :'<div class="empty"><div class="ico">📒</div>No settled customers yet</div>';
+}
+function custCard(c){
+  const txns=c.txns.slice().sort((a,b)=>(b.id||0)-(a.id||0)).slice(0,3);
+  const lines=txns.map(t=>`<div style="font-size:11px;color:var(--dim);margin-top:3px;">${t.type==='payment'?'💵 paid':'📒 took'} R${(t.amount||0).toFixed(2)} · ${t.note||'—'} · ${t.date}</div>`).join('');
+  const k=custKey(c.name);
+  return `<div class="reorder-card" style="border-left-color:var(--gold);display:block;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+      <div style="flex:1;min-width:0;">
+        <div class="ro-name">${c.name}</div>
+        <div class="ro-sub">${c.phone?'📱 '+c.phone:'no phone'} · gave R${c.given.toFixed(2)} · paid R${c.paid.toFixed(2)}</div>
+        ${lines}
+      </div>
+      <div style="text-align:right;flex-shrink:0;"><span style="font-size:17px;font-weight:800;color:var(--gold);">R${c.balance.toFixed(2)}</span></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+      <button class="btns" style="flex:1;min-width:90px;padding:8px;margin:0;font-size:11px;" onclick="recordPayment('${k}')">💵 Payment</button>
+      <button class="btns" style="flex:1;min-width:90px;padding:8px;margin:0;font-size:11px;border-color:var(--green);color:var(--green);" onclick="remindCustomer('${k}')">📱 WhatsApp</button>
+      <button class="btns" style="flex:1;min-width:90px;padding:8px;margin:0;font-size:11px;" onclick="addMoreCredit('${k}')">+ Credit</button>
+    </div></div>`;
+}
+function findCustByKey(k){ return customerSummary().find(c=>custKey(c.name)===k); }
+function suggestCustomer(){
+  const q=document.getElementById('cr-name').value.trim().toLowerCase();
+  const el=document.getElementById('cr-suggest'); if(!q){ el.style.display='none'; return; }
+  const match=customerSummary().filter(c=>c.name.toLowerCase().includes(q));
+  if(!match.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  el.innerHTML=match.slice(0,3).map(c=>`<span style="cursor:pointer;text-decoration:underline;margin-right:10px;" onclick="useCust('${c.name.replace(/'/g,"\\'")}','${c.phone}')">${c.name}${c.balance>0?` (owes R${c.balance.toFixed(2)})`:''}</span>`).join('');
+}
+function useCust(name,phone){ document.getElementById('cr-name').value=name; document.getElementById('cr-phone').value=phone||''; document.getElementById('cr-suggest').style.display='none'; document.getElementById('cr-amount').focus(); }
+function todayStr(){ return new Date().toLocaleDateString('en-ZA',{day:'numeric',month:'short'}); }
+function nowStr(){ return new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}); }
+
+function addCredit(){
+  const name=document.getElementById('cr-name').value.trim();
+  const phone=document.getElementById('cr-phone').value.trim();
+  const amount=parseFloat(document.getElementById('cr-amount').value)||0;
+  const note=document.getElementById('cr-note').value.trim();
+  if(!name){ alert('Enter the customer name'); return; }
+  if(amount<=0){ alert('Enter the amount they owe'); return; }
+  // Backfill phone for any existing entries with same name
+  if(phone){ credit.forEach(c=>{ if(custKey(c.name)===custKey(name) && !c.phone) c.phone=phone; }); }
+  credit.unshift({id:Date.now(),name,phone,type:'credit',amount,note,date:todayStr(),time:nowStr()});
+  saveCredit(); addLog('Credit given',`${name}: ${R(amount)}`);
+  document.getElementById('cr-name').value=''; document.getElementById('cr-phone').value=''; document.getElementById('cr-amount').value=''; document.getElementById('cr-note').value=''; document.getElementById('cr-suggest').style.display='none';
+  renderCredit();
+  const c=findCustByKey(custKey(name)); if(c) notifyCredit(c);
+}
+function addMoreCredit(k){
+  const c=findCustByKey(k); if(!c) return;
+  const amount=parseFloat(prompt(`How much more credit for ${c.name}?`,''))||0;
+  if(amount<=0) return;
+  const note=prompt('What did they take? (optional)','')||'';
+  credit.unshift({id:Date.now(),name:c.name,phone:c.phone,type:'credit',amount,note,date:todayStr(),time:nowStr()});
+  saveCredit(); addLog('Credit given',`${c.name}: ${R(amount)}`); renderCredit();
+  const u=findCustByKey(k); if(u) notifyCredit(u);
+}
+function recordPayment(k){
+  const c=findCustByKey(k); if(!c) return;
+  const amount=parseFloat(prompt(`${c.name} owes R${c.balance.toFixed(2)}.\nHow much are they paying?`,c.balance.toFixed(2)))||0;
+  if(amount<=0) return;
+  if(amount>c.balance+0.01 && !confirm(`That's more than they owe (R${c.balance.toFixed(2)}). Record anyway?`)) return;
+  credit.unshift({id:Date.now(),name:c.name,phone:c.phone,type:'payment',amount,note:'payment received',date:todayStr(),time:nowStr()});
+  saveCredit(); addLog('Payment received',`${c.name}: ${R(amount)}`); renderCredit();
+  const u=findCustByKey(k); if(u) notifyPayment(u,amount);
+}
+function remindCustomer(k){
+  const c=findCustByKey(k); if(!c) return;
+  notifyCustomer(c);
+}
+function delCustomer(k){
+  if(!confirm('Delete all records for this customer?')) return;
+  credit=credit.filter(c=>custKey(c.name)!==k); saveCredit(); renderCredit();
+}
+function payCredit(id){ // legacy single-entry "mark paid" — convert to a payment
+  const c=credit.find(x=>x.id===id); if(!c) return;
+  credit.unshift({id:Date.now(),name:c.name,phone:c.phone||'',type:'payment',amount:c.amount,note:'paid in full',date:todayStr(),time:nowStr()});
+  saveCredit(); renderCredit();
+}
+function delCredit(id){
+  if(!confirm('Delete this record?')) return;
+  credit=credit.filter(c=>c.id!==id); saveCredit(); renderCredit();
+}
+
+// ── EXPENSES ──────────────────────────────────────────────────────────────────
+function renderExpenses(){
+  const tot=totalExpenses();
+  document.getElementById('exp-total').textContent=R(tot);
+  const recurring=expenses.filter(e=>e.freq==='weekly');
+  const oneoff=expenses.filter(e=>e.freq==='once');
+  document.getElementById('exp-sub').textContent=`${recurring.length} weekly · ${oneoff.length} one-off`;
+  const card=e=>{
+    const c=EXP_CAT[e.cat]||EXP_CAT.other;
+    return `<div class="reorder-card" style="border-left-color:var(--gold2);">
+      <div><div class="ro-name">${c.i} ${e.name}</div><div class="ro-sub">${c.l}</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="number" value="${e.amount||''}" placeholder="0" step="0.01"
+          style="width:90px;text-align:right;font-size:15px;font-weight:700;padding:7px 8px;"
+          oninput="setExpAmount(${e.id},this.value)"/>
+        <button class="scard-del" onclick="delExpense(${e.id})">×</button>
+      </div></div>`;
+  };
+  document.getElementById('exp-recurring').innerHTML=recurring.length?recurring.map(card).join(''):'<div class="empty"><div class="ico">📋</div>No weekly expenses</div>';
+  document.getElementById('exp-oneoff').innerHTML=oneoff.length?oneoff.map(card).join(''):'<div class="empty"><div class="ico">📋</div>No one-off expenses</div>';
+}
+function addExpense(){
+  const name=document.getElementById('exp-name').value.trim();
+  const cat=document.getElementById('exp-cat').value;
+  const amount=parseFloat(document.getElementById('exp-amount').value)||0;
+  const freq=document.getElementById('exp-freq').value;
+  if(!name){ alert('Enter what the expense is for'); return; }
+  expenses.push({id:Date.now(),name,cat,amount,freq});
+  saveExp(); addLog('Expense added',`${name}: ${R(amount)}`);
+  document.getElementById('exp-name').value=''; document.getElementById('exp-amount').value='';
+  renderExpenses(); renderDash();
+}
+function setExpAmount(id,val){
+  const e=expenses.find(x=>x.id===id); if(!e) return;
+  e.amount=parseFloat(val)||0; saveExp();
+  document.getElementById('exp-total').textContent=R(totalExpenses());
+}
+function delExpense(id){
+  if(!confirm('Remove this expense?')) return;
+  expenses=expenses.filter(e=>e.id!==id); saveExp(); renderExpenses(); renderDash();
+}
+
+// ── EDIT PRICES ───────────────────────────────────────────────────────────────
+function editPrices(id){
+  const item=stock.find(i=>i.id===id); if(!item) return;
+  const cost=prompt(`${item.name}\n\nBUY price — what YOU pay per ${cfg(item).unit.replace(/s$/,'')} (R):`, item.cost||0);
+  if(cost===null) return;
+  const sell=prompt(`${item.name}\n\nSELL price — what CUSTOMERS pay each (R):`, item.sell||0);
+  if(sell===null) return;
+  const min=prompt(`${item.name}\n\nRefill alert when loose units drop below:`, item.min||6);
+  item.cost=parseFloat(cost)||0;
+  item.sell=parseFloat(sell)||0;
+  if(min!==null) item.min=parseInt(min)||item.min;
+  save(); addLog(item.name,`Prices: buy ${R(item.cost)}, sell ${R(item.sell)}`);
+  renderStock(); renderDash();
+}
+
+// ── REPORT ────────────────────────────────────────────────────────────────────
+function renderReport(){
+  const rev=stock.reduce((s,i)=>s+revenueThisWeek(i),0);
+  const cogs=stock.reduce((s,i)=>s+cogsThisWeek(i),0);
+  const gross=rev-cogs;
+  const compCost=stock.reduce((s,i)=>s+compCostThisWeek(i),0);
+  const exp=totalExpenses();
+  const net=gross-compCost-exp;
+  document.getElementById('rep-net').textContent=R(net);
+  document.getElementById('rep-net').style.color = net>=0?'var(--green)':'var(--red)';
+  document.getElementById('rep-sales').textContent=R(rev);
+  document.getElementById('rep-cogs').textContent=R(cogs);
+  document.getElementById('rep-gross').textContent=R(gross);
+  document.getElementById('rep-comp').textContent=R(compCost);
+  document.getElementById('rep-exp').textContent=R(exp);
+  document.getElementById('rep-netline').textContent=R(net);
+  document.getElementById('rep-netline').style.color = net>=0?'var(--green)':'var(--red)';
+  const owed=outstandingCredit();
+  document.getElementById('rep-credit-note').innerHTML = owed>0
+    ? `📒 <strong>${R(owed)}</strong> still owed to you on credit (counted as sales above, but not yet collected in cash).`
+    : '📒 No money out on credit.';
+
+  // Refill list
+  const low=stock.filter(i=>status(i)!=='ok');
+  document.getElementById('rep-reorder').innerHTML=low.length?low.map(item=>{
+    const c=cfg(item), sold=soldThisWeek(item);
+    // suggest 2x weekly usage as par, minus what's on hand
+    const par=Math.max(item.min, sold*2);
+    const need=Math.max(0, par-totalUnits(item));
+    const needBulk=Math.ceil(need/packSize(item));
+    return `<div class="reorder-card"><div><div class="ro-name">${item.name}</div>
+      <div class="ro-sub">${totalUnits(item)} left · sold ${sold} this week</div></div>
+      <div class="ro-qty">buy ~${needBulk} ${bulkLabel(item).toLowerCase()}${needBulk!==1?'s':''}<br><span style="color:var(--dim);font-weight:400;">(${need} ${c.unit})</span></div></div>`;
+  }).join(''):'<div class="empty"><div class="ico">✅</div>Nothing needs refilling</div>';
+
+  // Per-product breakdown
+  const sellable=stock.filter(i=>soldThisWeek(i)>0).sort((a,b)=>profitThisWeek(b)-profitThisWeek(a));
+  document.getElementById('rep-breakdown').innerHTML=sellable.length?sellable.map(item=>{
+    const c=cfg(item), sold=soldThisWeek(item);
+    return `<div class="rcard"><div class="rcard-head"><div class="rcard-name">${item.name}</div><span class="tag ${c.tag}">${c.label}</span></div>
+      <div class="rline"><span class="rk">Opening + bought</span><span class="rv">${(item.weekOpen||0)+(item.weekBought||0)} ${c.unit}</span></div>
+      <div class="rline"><span class="rk">Left now</span><span class="rv">${totalUnits(item)} ${c.unit}</span></div>
+      <div class="rline"><span class="rk">Sold</span><span class="rv">${sold} ${c.unit}</span></div>
+      <div class="rline"><span class="rk">Sales</span><span class="rv">${R(revenueThisWeek(item))}</span></div>
+      <div class="rline"><span class="rk">Cost of goods</span><span class="rv">${R(cogsThisWeek(item))}</span></div>
+      <div class="rprofit"><span>Profit</span><span class="rv">${R(profitThisWeek(item))}</span></div></div>`;
+  }).join(''):'<div class="empty"><div class="ico">📊</div>No sales recorded yet.<br>Do a stock count to calculate sales.</div>';
+
+  // Past weeks
+  document.getElementById('rep-weeks').innerHTML=weeks.length?weeks.map(w=>`
+    <div class="hcard"><div class="hcard-top"><div class="hdate">${w.label}</div>
+      <span class="hbadge hb-ok">${R(w.profit)} profit</span></div>
+      <div class="hrow"><span class="rk">Sales</span><span class="rv">${R(w.revenue)}</span></div>
+      <div class="hrow"><span class="rk">Units sold</span><span class="rv">${w.unitsSold}</span></div></div>`).join(''):'<div class="empty"><div class="ico">📅</div>No past weeks yet</div>';
+}
+
+function closeWeek(){
+  const rev=stock.reduce((s,i)=>s+revenueThisWeek(i),0);
+  const cogs=stock.reduce((s,i)=>s+cogsThisWeek(i),0);
+  const sold=stock.reduce((s,i)=>s+soldThisWeek(i),0);
+  const exp=totalExpenses();
+  const compCost=stock.reduce((s,i)=>s+compCostThisWeek(i),0);
+  const freeUnits=totalFreeThisWeek();
+  const gross=rev-cogs, net=gross-compCost-exp;
+  if(!confirm(`Close this week?\n\nSales: ${R(rev)}\nGross profit: ${R(gross)}\nFree drinks: ${R(compCost)} (${freeUnits})\nExpenses: ${R(exp)}\nNET PROFIT: ${R(net)}\n\nSaves the week & resets counters. Current stock becomes next week's opening. One-off expenses cleared; weekly ones stay. Unpaid credit carries over.`)) return;
+  const start=new Date(meta.weekStart), end=new Date();
+  weeks.unshift({label:`${start.toLocaleDateString('en-ZA',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('en-ZA',{day:'numeric',month:'short'})}`,revenue:rev,cogs,gross,freeCost:compCost,freeUnits,expenses:exp,profit:net,unitsSold:sold});
+  saveWeeks();
+  stock.forEach(i=>{ i.weekOpen=totalUnits(i); i.weekBought=0; i.weekComps=0; });
+  expenses=expenses.filter(e=>e.freq==='weekly'); // clear one-offs
+  saveExp();
+  meta.weekStart=new Date().toISOString(); saveMeta(); save();
+  addLog('Week Closed',`${R(net)} net profit`);
+  renderDash(); renderReport(); renderLog();
+  alert(`✅ Week saved!\nNET PROFIT: ${R(net)}\n\nNew week started.`);
+}
+
+// ── ULTRA ─────────────────────────────────────────────────────────────────────
+function renderUltra(){
+  const types=['All','beer','dampy','cans','cider','spirit'];
+  const tl={beer:'Bottles',dampy:'Dampies',cans:'Cans',cider:'Cider',spirit:'Spirits'};
+  document.getElementById('u-filts').innerHTML=types.map(t=>`<button class="fbtn${t===ufilt?' active':''}" onclick="setUFilt('${t}')">${t==='All'?'All':tl[t]}</button>`).join('');
+  let items=ULTRA; if(ufilt!=='All') items=items.filter(i=>i.t===ufilt);
+  document.getElementById('u-list').innerHTML=items.map(u=>`<div class="ucard">
+    <div style="display:flex;align-items:center;gap:8px;"><div class="uname">${u.n}</div>
+      <span class="tag ${CFG[u.t]?.tag||'t-other'}" style="font-size:9px;">${CFG[u.t]?.label||u.t}</span></div>
+    <div class="upack">${u.p}</div>
+    <div class="ubot"><div class="uprice">${u.r}</div><span class="ubadge ${u.a?'y':'n'}">${u.a?'✓ Available':'✗ Out'}</span></div></div>`).join('');
+}
+function setUFilt(t){ ufilt=t; renderUltra(); }
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+function renderLog(){
+  const el=document.getElementById('log-list');
+  if(!logs.length){ el.innerHTML='<div class="empty"><div class="ico">📋</div>No activity yet</div>'; return; }
+  el.innerHTML=logs.map(l=>`<div class="litem"><div><div class="lname">${l.name}</div><div class="ltime">${l.time}</div></div>
+    <div class="ldesc" style="color:${l.desc.includes('missing')||l.desc.includes('-')&&!l.desc.includes('profit')?'var(--red)':'var(--green)'}">${l.desc}</div></div>`).join('');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+const TABS=['dash','stock','buy','count','free','credit','expenses','report','data'];
+function tab(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('v-'+id).classList.add('active');
+  document.querySelectorAll('nav button')[TABS.indexOf(id)].classList.add('active');
+  if(id==='stock') renderStock();
+  if(id==='buy') populateBuySelect();
+  if(id==='count') renderCount();
+  if(id==='free') renderFree();
+  if(id==='credit') renderCredit();
+  if(id==='expenses') renderExpenses();
+  if(id==='report') renderReport();
+  if(id==='ultra') renderUltra();
+  if(id==='log') renderLog();
+}
+
+// ── DATA EXPORT / IMPORT ──────────────────────────────────────────────────────
+function exportJSON(){
+  const backup={stock,credit,expenses,history,weeks,meta};
+  const json=JSON.stringify(backup,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`mafut-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('✓ Backup downloaded');
+}
+function importJSON(){
+  const file=document.getElementById('import-file').files[0];
+  if(!file){ alert('Select a file'); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const backup=JSON.parse(e.target.result);
+      if(!confirm('Replace all current data with this backup? This cannot be undone.')) return;
+      stock=backup.stock||[];
+      credit=backup.credit||[];
+      expenses=backup.expenses||[];
+      history=backup.history||[];
+      weeks=backup.weeks||[];
+      meta=backup.meta||{weekStart:new Date().toISOString(),compLimit:0};
+      save(); saveCredit(); saveExp(); saveHist(); saveWeeks(); saveMeta(); populateCatalogDatalist();
+      renderDash(); renderStock();
+      alert('✓ Backup restored');
+      tab('dash');
+    }catch(err){ alert('Invalid backup file'); }
+  };
+  reader.readAsText(file);
+}
+function csvLine(fields){ return fields.map(f=>`"${(f||'').toString().replace(/"/g,'""')}"`).join(','); }
+function exportCSVStock(){
+  const rows=[csvLine(['Name','Type','Pack Size','In Stock','Cost/unit','Sell Price'])];
+  stock.forEach(s=>{ rows.push(csvLine([s.name,s.type,s.pk||'—',totalUnits(s),s.cost||0,s.sell||0])); });
+  downloadCSV(rows,'stock');
+}
+function exportCSVCredit(){
+  const rows=[csvLine(['Date','Name','Phone','Type','Amount','Balance','Note'])];
+  const custs=customerSummary();
+  custs.forEach(c=>{
+    c.txns.slice().reverse().forEach(t=>{ rows.push(csvLine([t.date,t.name,t.phone,t.type,t.amount,t.type==='payment'?'—':c.balance,t.note])); });
+  });
+  downloadCSV(rows,'credit-book');
+}
+function exportCSVExpenses(){
+  const rows=[csvLine(['Name','Category','Amount','Frequency'])];
+  expenses.forEach(e=>{ rows.push(csvLine([e.name,e.cat,e.amount,e.freq])); });
+  downloadCSV(rows,'expenses');
+}
+function exportCSVHistory(){
+  const rows=[csvLine(['Week Start','Closed','Revenue','COGS','Profit','Units Sold'])];
+  weeks.forEach(w=>{ rows.push(csvLine([w.start,w.closed?'Yes':'No',w.revenue||0,w.cogs||0,w.profit||0,w.sold||0])); });
+  downloadCSV(rows,'weekly-history');
+}
+function downloadCSV(lines,name){
+  const csv=lines.join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`${name}-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+renderDash();
+populateCatalogDatalist();
+</script>
+</body>
+</html>
