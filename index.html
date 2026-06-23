@@ -1785,6 +1785,117 @@ function downloadCSV(lines,name){
   URL.revokeObjectURL(url);
 }
 
+// ── SUPABASE CLOUD SYNC ────────────────────────────────────────────────────────
+const SUPABASE_URL='https://dlxifcpcumdkndguyycj.supabase.co';
+const SUPABASE_KEY='sb_publishable_HhLgEVD8CU1eNYGTczfPtw_OvWoQAFs';
+let supabaseClient=null, currentUser=null, isSyncing=false;
+
+async function initSupabase(){
+  try{
+    if(typeof supabase==='undefined'){
+      console.log('Supabase not loaded');
+      renderDash();populateCatalogDatalist();
+      return;
+    }
+    const{createClient}=supabase;
+    supabaseClient=createClient(SUPABASE_URL,SUPABASE_KEY);
+    const{data:{session}}=await supabaseClient.auth.getSession();
+    currentUser=session?.user;
+    if(currentUser){
+      await loadFromSupabase();
+    }else{
+      showAuthScreen();
+    }
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+      currentUser=session?.user;
+      if(!currentUser) showAuthScreen(); else location.reload();
+    });
+  }catch(e){
+    console.log('Supabase init error:',e);
+    renderDash();populateCatalogDatalist();
+  }
+}
+
+function showAuthScreen(){
+  document.body.innerHTML=`
+    <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;width:100%;max-width:320px;">
+        <h1 style="color:var(--gold);margin-bottom:24px;text-align:center;font-size:22px;">Mafut Nation</h1>
+        <div style="margin-bottom:16px;"><label style="color:var(--dim);font-size:11px;font-weight:500;">Email</label><input id="auth-email" type="email" placeholder="your@email.com" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;width:100%;outline:none;margin-top:4px;"/></div>
+        <div style="margin-bottom:20px;"><label style="color:var(--dim);font-size:11px;font-weight:500;">Password</label><input id="auth-pass" type="password" placeholder="••••••••" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;width:100%;outline:none;margin-top:4px;"/></div>
+        <button onclick="loginSupabase()" style="background:var(--gold);color:#000;border:none;border-radius:var(--r);padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;margin-bottom:12px;">Sign In</button>
+        <button onclick="signupSupabase()" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;">Sign Up</button>
+        <div style="font-size:11px;color:var(--dim);margin-top:16px;text-align:center;">First time? Click Sign Up</div>
+      </div>
+    </div>`;
+}
+
+async function loginSupabase(){
+  const email=document.getElementById('auth-email').value;
+  const pass=document.getElementById('auth-pass').value;
+  if(!email||!pass){alert('Enter email and password');return;}
+  try{
+    const{error}=await supabaseClient.auth.signInWithPassword({email,password:pass});
+    if(error) alert('Error: '+error.message);
+  }catch(e){alert('Error: '+e.message);}
+}
+
+async function signupSupabase(){
+  const email=document.getElementById('auth-email').value;
+  const pass=document.getElementById('auth-pass').value;
+  if(!email||!pass){alert('Enter email and password');return;}
+  try{
+    const{error}=await supabaseClient.auth.signUp({email,password:pass});
+    if(error) alert('Error: '+error.message);
+    else alert('Sign up successful! Check your email to confirm.');
+  }catch(e){alert('Error: '+e.message);}
+}
+
+async function saveToSupabase(){
+  if(!currentUser||!supabaseClient||isSyncing) return;
+  isSyncing=true;
+  try{
+    const payload={user_id:currentUser.id,stock,credit,expenses,history,weeks,meta,freelog,updated_at:new Date()};
+    const{error}=await supabaseClient.from('mafut_data').upsert([payload],{onConflict:'user_id'});
+    if(error) console.log('Sync error:',error.message);
+  }catch(e){console.log('Sync error:',e);}
+  isSyncing=false;
+}
+
+async function loadFromSupabase(){
+  if(!currentUser||!supabaseClient) return;
+  try{
+    const{data,error}=await supabaseClient.from('mafut_data').select('*').eq('user_id',currentUser.id).single();
+    if(error&&error.code!=='PGRST116'){console.log('Load error:',error);}
+    if(data){
+      stock=data.stock||stock;
+      credit=data.credit||credit;
+      expenses=data.expenses||expenses;
+      history=data.history||history;
+      weeks=data.weeks||weeks;
+      meta=data.meta||meta;
+      freelog=data.freelog||freelog;
+    }
+  }catch(e){console.log('Load error:',e);}
+  renderDash();populateCatalogDatalist();
+}
+
+// Override save functions to sync
+const origSave=save;save=()=>{origSave();saveToSupabase();};
+const origSaveCredit=saveCredit;saveCredit=()=>{origSaveCredit();saveToSupabase();};
+const origSaveExp=saveExp;saveExp=()=>{origSaveExp();saveToSupabase();};
+const origSaveHist=saveHist;saveHist=()=>{origSaveHist();saveToSupabase();};
+const origSaveWeeks=saveWeeks;saveWeeks=()=>{origSaveWeeks();saveToSupabase();};
+const origSaveMeta=saveMeta;saveMeta=()=>{origSaveMeta();saveToSupabase();};
+
+// Load Supabase and initialize auth
+const sbScript=document.createElement('script');
+sbScript.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+sbScript.async=true;
+sbScript.onload=initSupabase;
+sbScript.onerror=()=>{console.log('Supabase CDN failed');renderDash();populateCatalogDatalist();};
+document.head.appendChild(sbScript);
+
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </body>
