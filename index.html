@@ -203,6 +203,30 @@
 
     .empty{text-align:center;padding:32px 20px;color:var(--dim);font-size:13px;}
     .empty .ico{font-size:38px;margin-bottom:10px;}
+
+    .analytics-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+    .metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;animation:slideUp 0.6s ease forwards;}
+    .metric-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(245,184,64,.1),transparent);animation:glow 3s ease infinite;}
+    .metric-card.accent{border-color:var(--gold);background:rgba(245,184,64,.08);}
+    .metric-label{font-size:11px;color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+    .metric-value{font-size:26px;font-weight:700;color:var(--gold);margin:8px 0;position:relative;z-index:1;letter-spacing:-0.5px;}
+    .metric-sub{font-size:10px;color:var(--dim);position:relative;z-index:1;}
+
+    .chart-container{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;animation:slideUp 0.8s ease forwards;}
+    .chart-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;letter-spacing:-0.2px;}
+
+    .profit-bar{display:flex;align-items:center;margin-bottom:12px;gap:12px;}
+    .profit-name{font-size:12px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .profit-meter{flex:2;background:var(--surface);border-radius:8px;height:24px;overflow:hidden;position:relative;}
+    .profit-fill{height:100%;background:linear-gradient(90deg,var(--gold),#f5c555);animation:fillWidth 1s ease forwards;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;color:#000;font-weight:600;}
+    .profit-value{font-size:11px;color:var(--gold);font-weight:600;min-width:50px;text-align:right;}
+
+    @keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes glow{0%,100%{opacity:0.5;}50%{opacity:1;}}
+    @keyframes fillWidth{from{width:0;}to{width:var(--fill-width,100%);}}
+
+    @media(max-width:600px){.analytics-grid{grid-template-columns:1fr;}}
+
   </style>
 </head>
 <body>
@@ -214,10 +238,10 @@
 
 <nav>
   <button class="active" onclick="tab('dash')">Home</button>
+  <button onclick="tab('analytics')">Analytics</button>
   <button onclick="tab('stock')">Stock</button>
   <button onclick="tab('buy')">Buy</button>
   <button onclick="tab('count')">Count</button>
-  <button onclick="tab('free')">Comps</button>
   <button onclick="tab('credit')">Credit</button>
   <button onclick="tab('expenses')">Expenses</button>
   <button onclick="tab('report')">Report</button>
@@ -541,6 +565,46 @@
   <p style="font-size:11px;color:var(--dim);margin-bottom:14px;">Typical Ultra Liquors SA prices — verify in store.</p>
   <div class="filters" id="u-filts"></div>
   <div id="u-list"></div>
+</div>
+
+<!-- ANALYTICS -->
+<div id="v-analytics" class="view">
+  <div class="analytics-grid">
+    <div class="metric-card">
+      <div class="metric-label">Stock value</div>
+      <div class="metric-value" id="ana-stock-val">R0</div>
+      <div class="metric-sub">at cost</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Potential revenue</div>
+      <div class="metric-value" id="ana-potential-rev">R0</div>
+      <div class="metric-sub">if all sold</div>
+    </div>
+    <div class="metric-card accent">
+      <div class="metric-label">Potential profit</div>
+      <div class="metric-value" id="ana-potential-profit">R0</div>
+      <div class="metric-sub">before expenses</div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Top 5 profit makers</div>
+    <div id="ana-top-products"></div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Stock level tracking</div>
+    <div style="position:relative;width:100%;height:280px;margin-top:12px;">
+      <canvas id="ana-stock-chart" role="img" aria-label="Stock levels by product">Stock chart</canvas>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Weekly profit trend</div>
+    <div style="position:relative;width:100%;height:200px;margin-top:12px;">
+      <canvas id="ana-trend-chart" role="img" aria-label="Weekly profit trend">Trend chart</canvas>
+    </div>
+  </div>
 </div>
 
 <!-- DATA / EXPORT -->
@@ -1588,13 +1652,54 @@ function renderLog(){
     <div class="ldesc" style="color:${l.desc.includes('missing')||l.desc.includes('-')&&!l.desc.includes('profit')?'var(--red)':'var(--green)'}">${l.desc}</div></div>`).join('');
 }
 
+// ── ANALYTICS ────────────────────────────────────────────────────────────────
+function renderAnalytics(){
+  let stockVal=0, potentialRev=0;
+  const productProfit=[];
+  stock.forEach(s=>{
+    const units=totalUnits(s);
+    const cost=(s.cost||0)*units;
+    const revenue=(s.sell||0)*units;
+    const profit=revenue-cost;
+    stockVal+=cost;
+    potentialRev+=revenue;
+    if(units>0) productProfit.push({name:s.name,profit,units,cost:s.cost,sell:s.sell});
+  });
+  productProfit.sort((a,b)=>b.profit-a.profit);
+  const potentialProfit=potentialRev-stockVal;
+
+  document.getElementById('ana-stock-val').textContent=R(stockVal);
+  document.getElementById('ana-potential-rev').textContent=R(potentialRev);
+  document.getElementById('ana-potential-profit').textContent=R(potentialProfit);
+
+  const top5=productProfit.slice(0,5);
+  const maxProfit=Math.max(...top5.map(p=>p.profit),1);
+  document.getElementById('ana-top-products').innerHTML=top5.map(p=>{
+    const pct=(p.profit/maxProfit)*100;
+    return `<div class="profit-bar"><div class="profit-name">${p.name}</div><div class="profit-meter"><div class="profit-fill" style="width:${pct}%">${pct>10?'R'+(p.profit/1000).toFixed(1)+'k':''}</div></div><div class="profit-value">${R(p.profit)}</div></div>`;
+  }).join('');
+
+  // Charts (if Chart.js loaded)
+  if(typeof Chart !== 'undefined'){
+    const stockData=productProfit.slice(0,8).map(p=>p.units);
+    const stockLabels=productProfit.slice(0,8).map(p=>p.name.substring(0,15));
+    setTimeout(()=>{
+      try{new Chart(document.getElementById('ana-stock-chart'),{type:'bar',data:{labels:stockLabels,datasets:[{label:'Units',data:stockData,backgroundColor:'#f5b840',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'var(--dim)'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'var(--dim)',font:{size:10}},grid:{display:false}}}}})}catch(e){}
+      const trendData=weeks.slice(-8).map(w=>w.profit||0);
+      const trendLabels=weeks.slice(-8).map((w,i)=>'W'+(weeks.length-7+i));
+      try{new Chart(document.getElementById('ana-trend-chart'),{type:'line',data:{labels:trendLabels,datasets:[{label:'Profit',data:trendData,borderColor:'#f5b840',backgroundColor:'rgba(245,184,64,.1)',tension:0.4,fill:true,pointBackgroundColor:'#f5b840'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'var(--dim)'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'var(--dim)'},grid:{display:false}}}}})}catch(e){}
+    },100);
+  }
+}
+
 // ── TABS ──────────────────────────────────────────────────────────────────────
-const TABS=['dash','stock','buy','count','free','credit','expenses','report','data'];
+const TABS=['dash','analytics','stock','buy','count','free','credit','expenses','report','data'];
 function tab(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('v-'+id).classList.add('active');
   document.querySelectorAll('nav button')[TABS.indexOf(id)].classList.add('active');
+  if(id==='analytics') renderAnalytics();
   if(id==='stock') renderStock();
   if(id==='buy') populateBuySelect();
   if(id==='count') renderCount();
@@ -1680,8 +1785,7 @@ function downloadCSV(lines,name){
   URL.revokeObjectURL(url);
 }
 
-renderDash();
-populateCatalogDatalist();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </body>
 </html>
