@@ -20,6 +20,7 @@
     header h1{font-size:19px;font-weight:700;letter-spacing:-0.3px;color:var(--text);}
     header h1 span{color:var(--gold);}
     header p{font-size:11px;color:var(--dim);margin-top:1px;font-weight:500;}
+    #sync-status{position:absolute;top:17px;right:20px;font-size:11px;font-weight:600;color:var(--dim);}
 
     nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:55px;z-index:99;overflow-x:auto;scrollbar-width:none;padding:0 4px;}
     nav::-webkit-scrollbar{display:none;}
@@ -234,18 +235,20 @@
 <header>
   <h1>Mafut <span>Nation</span></h1>
   <p>Bar Stock & Sales · Germiston</p>
+  <span id="sync-status"></span>
 </header>
 
 <nav>
-  <button class="active" onclick="tab('dash')">Home</button>
-  <button onclick="tab('analytics')">Analytics</button>
-  <button onclick="tab('stock')">Stock</button>
-  <button onclick="tab('buy')">Buy</button>
-  <button onclick="tab('count')">Count</button>
-  <button onclick="tab('credit')">Credit</button>
-  <button onclick="tab('expenses')">Expenses</button>
-  <button onclick="tab('report')">Report</button>
-  <button onclick="tab('data')">Data</button>
+  <button class="active" data-tab="dash" onclick="tab('dash')">Home</button>
+  <button data-tab="analytics" onclick="tab('analytics')">Analytics</button>
+  <button data-tab="stock" onclick="tab('stock')">Stock</button>
+  <button data-tab="buy" onclick="tab('buy')">Buy</button>
+  <button data-tab="count" onclick="tab('count')">Count</button>
+  <button data-tab="free" onclick="tab('free')">Free drinks</button>
+  <button data-tab="credit" onclick="tab('credit')">Credit</button>
+  <button data-tab="expenses" onclick="tab('expenses')">Expenses</button>
+  <button data-tab="report" onclick="tab('report')">Report</button>
+  <button data-tab="data" onclick="tab('data')">Data</button>
 </nav>
 
 <!-- HOME -->
@@ -297,6 +300,7 @@
         <div>
           <label id="buy-bulk-lbl">Crates</label>
           <input id="buy-bulk" type="number" placeholder="0" min="0" oninput="updateBuyPreview()"/>
+          <div class="hint" id="buy-bulk-hint"></div>
         </div>
         <div>
           <label>Extra loose</label>
@@ -629,6 +633,12 @@
         <div class="hint" style="margin-top:8px;">Replaces current data — backup first!</div>
       </div>
     </div>
+  </div>
+
+  <div class="form-card" id="backup-card" style="display:none;">
+    <h3>This phone's old data</h3>
+    <div class="hint" id="backup-info" style="margin-bottom:10px;"></div>
+    <button class="btns" onclick="restoreBackup()">Put back this phone's old data</button>
   </div>
 
   <div class="form-card">
@@ -1646,7 +1656,7 @@ function setUFilt(t){ ufilt=t; renderUltra(); }
 
 // ── LOG ───────────────────────────────────────────────────────────────────────
 function renderLog(){
-  const el=document.getElementById('log-list');
+  const el=document.getElementById('log-list'); if(!el) return; // the page has no activity-log screen
   if(!logs.length){ el.innerHTML='<div class="empty"><div class="ico">📋</div>No activity yet</div>'; return; }
   el.innerHTML=logs.map(l=>`<div class="litem"><div><div class="lname">${l.name}</div><div class="ltime">${l.time}</div></div>
     <div class="ldesc" style="color:${l.desc.includes('missing')||l.desc.includes('-')&&!l.desc.includes('profit')?'var(--red)':'var(--green)'}">${l.desc}</div></div>`).join('');
@@ -1684,21 +1694,22 @@ function renderAnalytics(){
     const stockData=productProfit.slice(0,8).map(p=>p.units);
     const stockLabels=productProfit.slice(0,8).map(p=>p.name.substring(0,15));
     setTimeout(()=>{
+      // A canvas that still holds the last visit's chart can't be drawn on again, so clear it first
+      Chart.getChart('ana-stock-chart')?.destroy(); Chart.getChart('ana-trend-chart')?.destroy();
       try{new Chart(document.getElementById('ana-stock-chart'),{type:'bar',data:{labels:stockLabels,datasets:[{label:'Units',data:stockData,backgroundColor:'#f5b840',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'var(--dim)'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'var(--dim)',font:{size:10}},grid:{display:false}}}}})}catch(e){}
-      const trendData=weeks.slice(-8).map(w=>w.profit||0);
-      const trendLabels=weeks.slice(-8).map((w,i)=>'W'+(weeks.length-7+i));
+      const recent=weeks.slice(0,8).reverse(); // latest 8 weeks, oldest first (weeks are stored newest first)
+      const trendData=recent.map(w=>w.profit||0);
+      const trendLabels=recent.map(w=>(w.label||'').split(' – ').pop());
       try{new Chart(document.getElementById('ana-trend-chart'),{type:'line',data:{labels:trendLabels,datasets:[{label:'Profit',data:trendData,borderColor:'#f5b840',backgroundColor:'rgba(245,184,64,.1)',tension:0.4,fill:true,pointBackgroundColor:'#f5b840'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'var(--dim)'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'var(--dim)'},grid:{display:false}}}}})}catch(e){}
     },100);
   }
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
-const TABS=['dash','analytics','stock','buy','count','free','credit','expenses','report','data'];
 function tab(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('v-'+id).classList.add('active');
-  document.querySelectorAll('nav button')[TABS.indexOf(id)].classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
   if(id==='analytics') renderAnalytics();
   if(id==='stock') renderStock();
   if(id==='buy') populateBuySelect();
@@ -1709,11 +1720,31 @@ function tab(id){
   if(id==='report') renderReport();
   if(id==='ultra') renderUltra();
   if(id==='log') renderLog();
+  if(id==='data') renderData();
 }
 
 // ── DATA EXPORT / IMPORT ──────────────────────────────────────────────────────
+function allData(){ return {stock,credit,expenses,history,weeks,meta,freelog:freeLog}; }
+function dataSummary(d){ return `${(d.stock||[]).length} products · ${(d.credit||[]).length} credit records · ${(d.weeks||[]).length} closed weeks`; }
+function applyBackup(b){
+  stock=b.stock||[]; credit=b.credit||[]; expenses=b.expenses||[]; history=b.history||[]; weeks=b.weeks||[];
+  meta=b.meta||{weekStart:new Date().toISOString(),compLimit:0}; freeLog=b.freelog||[];
+  save(); saveCredit(); saveExp(); saveHist(); saveWeeks(); saveMeta(); saveFreeLog(); populateCatalogDatalist();
+  renderDash(); renderStock();
+}
+function renderData(){
+  const b=JSON.parse(localStorage.getItem(BK)||'null');
+  document.getElementById('backup-card').style.display=b?'block':'none';
+  if(b) document.getElementById('backup-info').textContent=`Kept on ${new Date(b.time).toLocaleString('en-ZA',{dateStyle:'medium',timeStyle:'short'})}, when cloud data replaced it: ${dataSummary(b.data)}.`;
+}
+function restoreBackup(){
+  const b=JSON.parse(localStorage.getItem(BK)||'null'); if(!b) return;
+  if(!confirm("Put back this phone's old data? It replaces the data you see now, on this phone and in the cloud.")) return;
+  applyBackup(b.data); localStorage.removeItem(BK);
+  alert("✓ This phone's old data is back"); tab('dash');
+}
 function exportJSON(){
-  const backup={stock,credit,expenses,history,weeks,meta};
+  const backup=allData();
   const json=JSON.stringify(backup,null,2);
   const blob=new Blob([json],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -1734,21 +1765,14 @@ function importJSON(){
     try{
       const backup=JSON.parse(e.target.result);
       if(!confirm('Replace all current data with this backup? This cannot be undone.')) return;
-      stock=backup.stock||[];
-      credit=backup.credit||[];
-      expenses=backup.expenses||[];
-      history=backup.history||[];
-      weeks=backup.weeks||[];
-      meta=backup.meta||{weekStart:new Date().toISOString(),compLimit:0};
-      save(); saveCredit(); saveExp(); saveHist(); saveWeeks(); saveMeta(); populateCatalogDatalist();
-      renderDash(); renderStock();
+      applyBackup(backup);
       alert('✓ Backup restored');
       tab('dash');
     }catch(err){ alert('Invalid backup file'); }
   };
   reader.readAsText(file);
 }
-function csvLine(fields){ return fields.map(f=>`"${(f||'').toString().replace(/"/g,'""')}"`).join(','); }
+function csvLine(fields){ return fields.map(f=>`"${(f??'').toString().replace(/"/g,'""')}"`).join(','); }
 function exportCSVStock(){
   const rows=[csvLine(['Name','Type','Pack Size','In Stock','Cost/unit','Sell Price'])];
   stock.forEach(s=>{ rows.push(csvLine([s.name,s.type,s.pk||'—',totalUnits(s),s.cost||0,s.sell||0])); });
@@ -1768,8 +1792,8 @@ function exportCSVExpenses(){
   downloadCSV(rows,'expenses');
 }
 function exportCSVHistory(){
-  const rows=[csvLine(['Week Start','Closed','Revenue','COGS','Profit','Units Sold'])];
-  weeks.forEach(w=>{ rows.push(csvLine([w.start,w.closed?'Yes':'No',w.revenue||0,w.cogs||0,w.profit||0,w.sold||0])); });
+  const rows=[csvLine(['Week','Revenue','COGS','Profit','Units Sold'])];
+  weeks.forEach(w=>{ rows.push(csvLine([w.label,w.revenue||0,w.cogs||0,w.profit||0,w.unitsSold||0])); });
   downloadCSV(rows,'weekly-history');
 }
 function downloadCSV(lines,name){
@@ -1788,37 +1812,52 @@ function downloadCSV(lines,name){
 // ── SUPABASE CLOUD SYNC ────────────────────────────────────────────────────────
 const SUPABASE_URL='https://dlxifcpcumdkndguyycj.supabase.co';
 const SUPABASE_KEY='sb_publishable_HhLgEVD8CU1eNYGTczfPtw_OvWoQAFs';
-let supabaseClient=null, currentUser=null, isSyncing=false;
+const SYK='mafut5_sync', BK='mafut5_backup';
+let supabaseClient=null, currentUser=null, isSyncing=false, syncAgain=false, cloudReady=false, syncTimer=null;
+// rev = the cloud copy this device last saved or downloaded · dirty = changes on this device the cloud doesn't have yet
+let syncState=JSON.parse(localStorage.getItem(SYK)||'{}');
+function saveSyncState(){ localStorage.setItem(SYK,JSON.stringify(syncState)); }
+function syncStatus(text,color){ const el=document.getElementById('sync-status'); if(el){ el.textContent=text; el.style.color=color||''; } }
+function phoneOnly(){ syncStatus('⚠ Offline','var(--yellow)'); renderDash();populateCatalogDatalist(); }
 
 async function initSupabase(){
   try{
     if(typeof supabase==='undefined'){
       console.log('Supabase not loaded');
-      renderDash();populateCatalogDatalist();
+      phoneOnly();
       return;
     }
     const{createClient}=supabase;
     supabaseClient=createClient(SUPABASE_URL,SUPABASE_KEY);
-    const{data:{session}}=await supabaseClient.auth.getSession();
+    const{data:{session},error}=await supabaseClient.auth.getSession();
+    // Signed in before, but the login couldn't be renewed (no internet, cloud down): keep working on this phone
+    if(error&&!session){ console.log('Supabase auth error:',error.message); phoneOnly(); return; }
     currentUser=session?.user;
     if(currentUser){
       await loadFromSupabase();
     }else{
-      showAuthScreen();
+      showAuthScreen(); renderDash();populateCatalogDatalist();
     }
+    // This also fires straight away with the current session and on every token refresh, so only react
+    // to a real sign-in or sign-out (reloading on every event made the page reload forever)
     supabaseClient.auth.onAuthStateChange((event,session)=>{
+      const wasSignedIn=!!currentUser;
       currentUser=session?.user;
-      if(!currentUser) showAuthScreen(); else location.reload();
+      if(!currentUser){ if(wasSignedIn) showAuthScreen(); }
+      else if(!wasSignedIn) location.reload();
     });
   }catch(e){
     console.log('Supabase init error:',e);
-    renderDash();populateCatalogDatalist();
+    phoneOnly();
   }
 }
 
+// Sign-in covers the app instead of replacing it, so the bar can still run on this phone without the cloud
 function showAuthScreen(){
-  document.body.innerHTML=`
-    <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;">
+  syncStatus('⚠ Not signed in','var(--yellow)');
+  if(document.getElementById('auth-screen')) return;
+  document.body.insertAdjacentHTML('beforeend',`
+    <div id="auth-screen" style="position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;width:100%;max-width:320px;">
         <h1 style="color:var(--gold);margin-bottom:24px;text-align:center;font-size:22px;">Mafut Nation</h1>
         <div style="margin-bottom:16px;"><label style="color:var(--dim);font-size:11px;font-weight:500;">Email</label><input id="auth-email" type="email" placeholder="your@email.com" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;width:100%;outline:none;margin-top:4px;"/></div>
@@ -1826,8 +1865,9 @@ function showAuthScreen(){
         <button onclick="loginSupabase()" style="background:var(--gold);color:#000;border:none;border-radius:var(--r);padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;margin-bottom:12px;">Sign In</button>
         <button onclick="signupSupabase()" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;">Sign Up</button>
         <div style="font-size:11px;color:var(--dim);margin-top:16px;text-align:center;">First time? Click Sign Up</div>
+        <button onclick="document.getElementById('auth-screen').remove()" style="background:none;border:none;color:var(--dim);font-size:12px;text-decoration:underline;width:100%;margin-top:14px;cursor:pointer;">Use on this phone only (no cloud backup)</button>
       </div>
-    </div>`;
+    </div>`);
 }
 
 async function loginSupabase(){
@@ -1852,48 +1892,69 @@ async function signupSupabase(){
 }
 
 async function saveToSupabase(){
-  if(!currentUser||!supabaseClient||isSyncing) return;
-  isSyncing=true;
+  if(!currentUser||!supabaseClient||!cloudReady) return; // not before the cloud copy has been checked
+  if(isSyncing){ syncAgain=true; return; } // one upload at a time; the newest data goes up right after
+  isSyncing=true; syncAgain=false;
+  const rev=Date.now();
+  syncStatus('☁ Saving…');
   try{
-    const payload={user_id:currentUser.id,stock,credit,expenses,history,weeks,meta,freelog,updated_at:new Date()};
+    const payload={user_id:currentUser.id,...allData(),meta:{...meta,syncRev:rev},updated_at:new Date(rev)};
     const{error}=await supabaseClient.from('mafut_data').upsert([payload],{onConflict:'user_id'});
-    if(error) console.log('Sync error:',error.message);
-  }catch(e){console.log('Sync error:',e);}
+    if(error) throw error;
+    syncState.rev=rev; if(!syncAgain) syncState.dirty=false; saveSyncState();
+    syncStatus('☁ Saved '+nowStr(),'var(--green)');
+  }catch(e){ console.log('Sync error:',e.message||e); syncStatus('⚠ Not saved to cloud','var(--red)'); }
   isSyncing=false;
+  if(syncAgain) saveToSupabase();
 }
 
+// Has this device been used, beyond the starting stock list it comes with?
+function hasLocalWork(){ return logs.length>0||credit.length>0||weeks.length>0||history.length>0||freeLog.length>0||stock.some(s=>s.sell>0)||expenses.some(e=>e.amount>0); }
+function conflictText(d){
+  const t=d.meta?.syncRev||Date.parse(d.updated_at);
+  return `Your cloud account has data from another phone or computer${t?' (saved '+new Date(t).toLocaleString('en-ZA',{dateStyle:'medium',timeStyle:'short'})+')':''}:\n${dataSummary(d)}\n\nThis phone has different data:\n${dataSummary(allData())}\n\nOK = use the cloud data on this phone (this phone's data is kept in the Data tab)\nCancel = keep this phone's data and send it to the cloud`;
+}
 async function loadFromSupabase(){
   if(!currentUser||!supabaseClient) return;
+  syncStatus('☁ Connecting…');
   try{
-    const{data,error}=await supabaseClient.from('mafut_data').select('*').eq('user_id',currentUser.id).single();
-    if(error&&error.code!=='PGRST116'){console.log('Load error:',error);}
-    if(data){
-      stock=data.stock||stock;
-      credit=data.credit||credit;
-      expenses=data.expenses||expenses;
-      history=data.history||history;
-      weeks=data.weeks||weeks;
-      meta=data.meta||meta;
-      freelog=data.freelog||freelog;
+    const{data,error}=await supabaseClient.from('mafut_data').select('*').eq('user_id',currentUser.id).maybeSingle();
+    if(error) throw error;
+    // Does this device have changes the cloud doesn't? (A device that never synced counts if it has been used.)
+    let upload=syncState.rev?!!syncState.dirty:hasLocalWork();
+    const rev=data?.meta?.syncRev||0;
+    if(!data) upload=upload||hasLocalWork();
+    else if(rev!==syncState.rev && (!upload||confirm(conflictText(data)))){
+      // Saved from another device since this one last synced: use it, keeping this phone's own changes aside
+      if(upload) localStorage.setItem(BK,JSON.stringify({time:Date.now(),data:allData()}));
+      stock=data.stock||stock; credit=data.credit||credit; expenses=data.expenses||expenses; history=data.history||history;
+      weeks=data.weeks||weeks; meta=data.meta||meta; freeLog=data.freelog||freeLog;
+      origSave(); origSaveCredit(); origSaveExp(); origSaveHist(); origSaveWeeks(); origSaveMeta(); origSaveFreeLog();
+      syncState={rev,dirty:false}; saveSyncState(); upload=false;
     }
-  }catch(e){console.log('Load error:',e);}
+    cloudReady=true;
+    if(upload) await saveToSupabase(); else syncStatus('☁ Up to date','var(--green)');
+  }catch(e){ console.log('Load error:',e.message||e); syncStatus('⚠ Offline','var(--yellow)'); }
   renderDash();populateCatalogDatalist();
 }
 
-// Override save functions to sync
-const origSave=save;save=()=>{origSave();saveToSupabase();};
-const origSaveCredit=saveCredit;saveCredit=()=>{origSaveCredit();saveToSupabase();};
-const origSaveExp=saveExp;saveExp=()=>{origSaveExp();saveToSupabase();};
-const origSaveHist=saveHist;saveHist=()=>{origSaveHist();saveToSupabase();};
-const origSaveWeeks=saveWeeks;saveWeeks=()=>{origSaveWeeks();saveToSupabase();};
-const origSaveMeta=saveMeta;saveMeta=()=>{origSaveMeta();saveToSupabase();};
+// Override save functions to sync: mark this device as changed, then upload (saves made together go up as one)
+function dataChanged(){ syncState.dirty=true; saveSyncState(); clearTimeout(syncTimer); syncTimer=setTimeout(()=>{ syncTimer=null; saveToSupabase(); },300); }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&syncTimer){ clearTimeout(syncTimer); syncTimer=null; saveToSupabase(); } });
+const origSave=save;save=()=>{origSave();dataChanged();};
+const origSaveCredit=saveCredit;saveCredit=()=>{origSaveCredit();dataChanged();};
+const origSaveExp=saveExp;saveExp=()=>{origSaveExp();dataChanged();};
+const origSaveHist=saveHist;saveHist=()=>{origSaveHist();dataChanged();};
+const origSaveWeeks=saveWeeks;saveWeeks=()=>{origSaveWeeks();dataChanged();};
+const origSaveMeta=saveMeta;saveMeta=()=>{origSaveMeta();dataChanged();};
+const origSaveFreeLog=saveFreeLog;saveFreeLog=()=>{origSaveFreeLog();dataChanged();};
 
 // Load Supabase and initialize auth
 const sbScript=document.createElement('script');
 sbScript.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 sbScript.async=true;
 sbScript.onload=initSupabase;
-sbScript.onerror=()=>{console.log('Supabase CDN failed');renderDash();populateCatalogDatalist();};
+sbScript.onerror=()=>{console.log('Supabase CDN failed');phoneOnly();};
 document.head.appendChild(sbScript);
 
 </script>
